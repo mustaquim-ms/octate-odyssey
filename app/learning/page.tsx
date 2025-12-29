@@ -57,6 +57,23 @@ export default function LearningPage() {
           <ModuleGrid category="core" />
         </div>
 
+        {/* 5. PROFESSIONAL MASTERY (PHASE 2) */}
+        <div className="mt-40">
+          <div className="flex flex-col gap-2 mb-12">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-[1px] bg-[#7ed957]/30" />
+              <span className="text-[#7ed957] font-mono text-[10px] font-bold tracking-[0.6em] uppercase text-glow">Phase 02</span>
+            </div>
+            <h2 className="font-[family-name:var(--font-outfit)] text-5xl font-black uppercase tracking-tighter">
+              Professional Mastery
+            </h2>
+            <p className="text-gray-600 font-mono text-sm uppercase tracking-widest">Industry Certification Tracks (Cisco & MikroTik)</p>
+          </div>
+          
+          {/* Call ModuleGrid with the new category */}
+          <ModuleGrid category="professional" />
+        </div>
+
         {/* 4. SPECIALIZED TRACKS */}
         <div className="mt-40">
           <div className="flex flex-col gap-2 mb-12">

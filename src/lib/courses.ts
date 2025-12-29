@@ -886,4 +886,466 @@ Real engineering is 50% technology and 50% **Process**.
       ]
     }
   },
+   "osi-model": {
+    title: "Mastering TCP/IP and the OSI Model",
+    threshold: 85,
+    rankAward: "Protocol Pilot",
+    "lesson-1": {
+      title: "Why Networking Needs Layers",
+      duration: "45 mins",
+      content: `### Core Explanation
+Networking is incredibly complex. Data must be represented digitally, sent as electrical signals, routed globally, and understood by apps. Trying to solve this in one step would make systems **fragile** and **impossible to troubleshoot**. 
+
+Layering separates responsibilities, allowing vendors to innovate independently and protocols to evolve without breaking the entire internet.
+
+> ### The Restaurant Analogy
+> Think of a restaurant:
+> 1. **Kitchen:** Prepares food (Data Creation).
+> 2. **Packaging:** Ensures food stays intact (Encapsulation).
+> 3. **Delivery:** Transports the meal (Physical/Data Link).
+> 4. **Address:** Ensures correct destination (Network Layer).
+> 5. **Customer:** Consumes the food (Application).
+
+**Engineering Note:** Layering is the reason we can upgrade from Wi-Fi 5 to Wi-Fi 6 without needing to change how Google Chrome works.`,
+      practical: {
+        goal: "Analyze a protocol stack sequence. Type: 'stack --analyze --all'",
+        expected: "stack --analyze --all",
+        output: "[L7] HTTP GET /index.html\n[L4] TCP Port 80 (Reliable)\n[L3] IP Dest: 10.0.0.5\n[L2] MAC: AA:BB:CC\n[STATUS] Encapsulation logic verified."
+      },
+      quiz: [
+        { id: 1, q: "Why do we use layers in networking?", options: ["To make it slower", "To separate responsibilities and allow independent innovation", "Because routers require them"], correct: 1 },
+        { id: 2, q: "In the restaurant analogy, the kitchen represents:", options: ["Data Creation", "Physical Cables", "Routing"], correct: 0 }
+      ]
+    },
+    "lesson-2": {
+      title: "OSI Model — Layer Breakdown",
+      duration: "60 mins",
+      content: `### Deep Dive into the 7 Layers
+
+**Layer 1: Physical**
+- Deals with bits (0s and 1s), voltages, and light pulses.
+- *Failure example:* Unplugged cable or weak Wi-Fi signal.
+
+**Layer 2: Data Link**
+- Local delivery and MAC addresses.
+- *Math Insight:* MAC addresses are 48-bit. $2^{48}$ ≈ 281 Trillion unique addresses.
+
+**Layer 3: Network**
+- Logical addressing (IP) and routing decisions.
+- *Key Idea:* Routers forward based on the **Network Portion** only.
+
+**Layer 4: Transport**
+- Reliability and Port numbers.
+- *TCP Math:* **Window Size** controls how much data is sent before an ACK is required.
+
+**Layers 5–7 (Software Layers)**
+- **Session:** Connection tracking.
+- **Presentation:** Encryption and encoding.
+- **Application:** User-facing (HTTP, SMTP).
+
+**Troubleshooting Note:** Professionals move **Bottom-Up** (Physical first) or **Top-Down**, never randomly.`,
+      practical: {
+        goal: "Check for Layer 2 address conflicts. Type: 'arp -a'",
+        expected: "arp -a",
+        output: "Interface: 192.168.1.1 --- 00-11-22-33-44-55\nInterface: 192.168.1.5 --- AA-BB-CC-DD-EE-FF\n[INFO] 48-bit MAC addressing table is healthy."
+      },
+      quiz: [
+        { id: 1, q: "Which layer handles bit transmission (voltages/light)?", options: ["Layer 1", "Layer 3", "Layer 7"], correct: 0 },
+        { id: 2, q: "What is the primary identifier used at Layer 2?", options: ["IP Address", "MAC Address", "Port Number"], correct: 1 }
+      ]
+    },
+    "lesson-3": {
+      title: "TCP/IP Model and Real Traffic",
+      duration: "45 mins",
+      content: `### TCP vs. UDP
+**TCP (Transmission Control Protocol)**
+Ensures ordered delivery and retransmission of lost packets.
+- *Handshake Math:* **SYN -> SYN-ACK -> ACK**. Three messages establish trust.
+
+**UDP (User Datagram Protocol)**
+Removes acknowledgments. It is faster but less reliable. Use it when timing (gaming/VoIP) matters more than 100% accuracy.
+
+**Engineer’s Note:** If TCP feels slow, it is usually reacting to **Packet Loss**, not a lack of bandwidth.
+
+**Notes Summary:**
+- OSI = Thinking Model.
+- TCP/IP = Real Implementation.
+- Engineers troubleshoot logically, not emotionally.`,
+      practical: {
+        goal: "Initialize a TCP 3-Way Handshake. Type: 'tcp --connect 8.8.8.8'",
+        expected: "tcp --connect 8.8.8.8",
+        output: "[SEND] SYN\n[RECV] SYN-ACK\n[SEND] ACK\n[SUCCESS] Connection Established. Trust verified."
+      },
+      quiz: [
+        { id: 1, q: "Which protocol is 'connectionless' and faster?", options: ["TCP", "UDP"], correct: 1 },
+        { id: 2, q: "What are the three steps of the TCP handshake?", options: ["START, MID, END", "SYN, SYN-ACK, ACK", "HELLO, WAIT, GO"], correct: 1 }
+      ]
+    },
+    "lesson-4": {
+      title: "Encapsulation: The Data Journey",
+      duration: "45 mins",
+      content: `### Russian Doll Networking
+When you send data, it goes through **Encapsulation**. Each layer adds its own "header" (information) to the data, like putting a letter inside an envelope, then inside a box, then inside a shipping container.
+
+**The Stages:**
+1. **Data** (L7-5)
+2. **Segment** (L4 - TCP/UDP header)
+3. **Packet** (L3 - IP header)
+4. **Frame** (L2 - MAC header)
+5. **Bits** (L1 - Physical)
+
+**Learning Outcome:** You can visualize how data morphs as it moves down the stack.`,
+      practical: {
+        goal: "Analyze the headers of a captured segment. Type: 'inspect --headers --all'",
+        expected: "inspect --headers --all",
+        output: "[L2] Src: AA:01 | Dst: BB:02\n[L3] Src: 10.0.0.1 | Dst: 8.8.8.8\n[L4] Protocol: TCP | Win: 64240\n[STATUS] Decapsulation successful."
+      },
+      quiz: [
+        { id: 1, q: "What is data called at Layer 3?", options: ["Frame", "Packet", "Segment"], correct: 1 },
+        { id: 2, q: "Encapsulation happens when data moves which way?", options: ["Up the stack", "Down the stack", "Sideways"], correct: 1 },
+        { id: 3, q: "Which layer adds MAC address headers?", options: ["Network", "Data Link", "Physical"], correct: 1 }
+      ]
+    },
+    "lesson-5": {
+      title: "Common Ports: The Doors to Services",
+      duration: "45 mins",
+      content: `### Logic of Ports
+If the IP is the building address, the **Port** is the specific room number. Every application listens on a specific port.
+
+### Essential Port Registry:
+- **HTTP:** 80 (Web)
+- **HTTPS:** 443 (Secure Web)
+- **DNS:** 53 (Name Resolution)
+- **SSH:** 22 (Secure Shell)
+- **FTP:** 21 (File Transfer)
+
+**Engineering Note:** Blocking unused ports is the first step in "Hardening" a network.`,
+      practical: {
+        goal: "Scan the server for open application ports. Type: 'portscan --target 192.168.1.50'",
+        expected: "portscan --target 192.168.1.50",
+        output: "Port 22: OPEN (SSH)\nPort 80: OPEN (HTTP)\nPort 443: OPEN (HTTPS)\n[INFO] 3 services active on target host."
+      },
+      quiz: [
+        { id: 1, q: "Which port is used for HTTPS?", options: ["80", "443", "53"], correct: 1 },
+        { id: 2, q: "DNS operates on which port?", options: ["21", "22", "53"], correct: 2 },
+        { id: 3, q: "A port is like what in our building analogy?", options: ["The foundation", "The room number", "The wallpaper"], correct: 1 }
+      ]
+    },
+    "lesson-6": {
+      title: "Diagnostic Tools Mastery",
+      duration: "60 mins",
+      content: `### Thinking Like a Pro
+Network engineers use specific tools to test each layer of the OSI model. 
+
+### The Toolkit:
+- **Ping:** Tests Layer 3 connectivity.
+- **Traceroute:** Maps every hop in the path.
+- **Telnet/NC:** Tests if a specific port (Layer 4/7) is open.
+- **ARP:** Maps L3 IPs to L2 MACs.
+
+**Learning Outcome:** You can choose the right tool for the right layer failure.`,
+      practical: {
+        goal: "Verify if the web service is reachable on port 80. Type: 'nc -zv 10.0.0.1 80'",
+        expected: "nc -zv 10.0.0.1 80",
+        output: "Connection to 10.0.0.1 80 port [tcp/http] succeeded!\n[STATUS] Layer 4-7 path is verified."
+      },
+      quiz: [
+        { id: 1, q: "Which tool tests connectivity at Layer 3?", options: ["Ping", "ARP", "Wireshark"], correct: 0 },
+        { id: 2, q: "Traceroute shows you what?", options: ["The MAC address", "Every router in the path", "The user's name"], correct: 1 }
+      ]
+    },
+    "final-exam": {
+      title: "OSI & TCP/IP: Final Clearance",
+      questions: [
+        { q: "Which OSI layer is responsible for electrical signals and cable types?", options: ["Data Link", "Physical", "Network"], correct: 1 },
+        { q: "What is the data unit called at the Transport Layer (Layer 4)?", options: ["Packet", "Frame", "Segment"], correct: 2 },
+        { q: "Which protocol provides 'Reliable' delivery through acknowledgments?", options: ["UDP", "TCP", "IP"], correct: 1 },
+        { q: "A Switch operates primarily at which OSI layer?", options: ["Layer 1", "Layer 2", "Layer 3"], correct: 1 },
+        { q: "The process of adding a header as data moves down the stack is called:", options: ["Decapsulation", "Encryption", "Encapsulation"], correct: 2 },
+        { q: "Which port does a browser use for SECURE web traffic (HTTPS)?", options: ["80", "443", "22"], correct: 1 },
+        { q: "At which layer does IP Routing take place?", options: ["Layer 2", "Layer 3", "Layer 4"], correct: 1 },
+        { q: "What are the three steps of the TCP handshake?", options: ["HELLO, WAIT, GO", "SYN, SYN-ACK, ACK", "START, TRANSFER, END"], correct: 1 },
+        { q: "Which diagnostic tool maps the entire path (every hop) to a destination?", options: ["Ping", "Traceroute", "Ipconfig"], correct: 1 },
+        { q: "How many bits are in a standard MAC address?", options: ["32-bit", "48-bit", "64-bit"], correct: 1 },
+        { q: "Which layer handles data encryption and compression?", options: ["Application", "Presentation", "Session"], correct: 1 },
+        { q: "What is the purpose of the TCP 'Window Size'?", options: ["To define the IP", "To control flow/buffer limits", "To hide the port"], correct: 1 },
+        { q: "DNS (Name Resolution) uses which port number?", options: ["21", "25", "53"], correct: 2 },
+        { q: "Which protocol is 'connectionless' and used for streaming/VoIP?", options: ["TCP", "UDP", "HTTP"], correct: 1 },
+        { q: "If you move 'Bottom-Up' in troubleshooting, which layer do you check first?", options: ["Physical", "Network", "Application"], correct: 0 }
+      ]
+    }
+  },
+  "subnetting": {
+    title: "Subnetting Made Simple — IPv4 & IPv6",
+    threshold: 85,
+    rankAward: "Subnet Samurai",
+    "lesson-1": {
+      title: "IP Address Structure",
+      duration: "60 mins",
+      content: `### IPv4 Basics
+An IPv4 address is 32 bits total, written as 4 octets (8 bits each).
+- **Example:** 192.168.1.10
+- **Binary:** \`11000000.10101000.00000001.00001010\`
+
+### Network vs. Host Portion
+The **Subnet Mask** defines the split.
+- **IP:** 192.168.1.10
+- **Mask:** 255.255.255.0 (/24)
+- *Result:* First 24 bits = Network. Last 8 bits = Hosts.
+
+### Math Note: Usable Hosts
+Formula: $2^{host\_bits} - 2$
+**Why minus 2?** You must subtract the **Network Address** (first IP) and the **Broadcast Address** (last IP).`,
+      practical: {
+        goal: "Convert the first octet of 192.x.x.x to binary. Type: 'bin --convert 192'",
+        expected: "bin --convert 192",
+        output: "Decimal: 192\nBinary: 11000000\nNetwork Bits: 11000000 (Binary High)"
+      },
+      quiz: [
+        { id: 1, q: "How many bits are in an IPv4 address?", options: ["16", "32", "128"], correct: 1 },
+        { id: 2, q: "Why do we subtract 2 when calculating usable hosts?", options: ["For the Router and Switch", "For the Network and Broadcast addresses", "To save energy"], correct: 1 }
+      ]
+    },
+    "lesson-2": {
+      title: "Subnetting Math (Step-by-Step)",
+      duration: "75 mins",
+      content: `### Example Problem
+**Network:** 192.168.1.0/24 
+**Requirement:** Create 6 subnets.
+
+### Steps to Solve:
+1. **Find bits to borrow:** $2^3 = 8$ subnets (3 bits is enough to cover 6).
+2. **New Mask:** /24 + 3 borrowed bits = **/27**.
+3. **Host bits left:** 32 - 27 = **5 bits**.
+4. **Usable hosts:** $2^5 - 2 = \mathbf{30}$ hosts per subnet.
+
+### Increment Calculation
+Increment = 256 - Subnet Mask Value.
+For /27, the mask is 255.255.255.224.
+**256 - 224 = 32.**
+
+**Subnets:** .0, .32, .64, .96, .128, etc.`,
+      practical: {
+        goal: "Calculate the increment for a /26 mask (255.255.255.192). Type: 'calc --increment 192'",
+        expected: "calc --increment 192",
+        output: "256 - 192 = 64.\nSubnets: .0, .64, .128, .192\n[SUCCESS] Increment Logic Validated."
+      },
+      quiz: [
+        { id: 1, q: "If you borrow 2 bits from a /24, what is the new CIDR?", options: ["/25", "/26", "/28"], correct: 1 },
+        { id: 2, q: "What is the host increment for a 255.255.255.240 mask?", options: ["16", "32", "8"], correct: 0 }
+      ]
+    },
+    "lesson-3": {
+      title: "IPv6 Explained Clearly",
+      duration: "45 mins",
+      content: `### IPv6 Structure
+IPv6 is **128 bits**, written in hexadecimal blocks. 
+- **Example:** \`2001:0db8:85a3::8a2e:0370:7334\`
+
+### Why IPv6 is Easier
+1. **No Scarcity:** There are enough addresses for every grain of sand on earth.
+2. **No NAT:** Devices connect directly.
+3. **Standardization:** /64 is the standard subnet size for almost everything.
+
+**Engineer’s Note:** IPv6 trades "math complexity" for "abundance." You stop counting bits and start designing flows.`,
+      practical: {
+        goal: "Compress the IPv6 address 2001:0db8:0000:0000:0000:0000:0000:0001. Type: 'ipv6 --compress'",
+        expected: "ipv6 --compress",
+        output: "Full: 2001:0db8:0000:0000:0000:0000:0000:0001\nCompressed: 2001:db8::1\n[INFO] Double colons used to replace zero blocks."
+      },
+      quiz: [
+        { id: 1, q: "How many bits are in an IPv6 address?", options: ["32", "64", "128"], correct: 2 },
+        { id: 2, q: "IPv6 is written in which format?", options: ["Dotted Decimal", "Hexadecimal", "Binary Only"], correct: 1 }
+      ]
+    },
+    "lesson-4": {
+      title: "CIDR and the /Slash Notation",
+      duration: "60 mins",
+      content: `### Beyond Classes
+In the early days, IPs were rigid (Class A, B, C). **CIDR** (Classless Inter-Domain Routing) changed this by using the "Slash" notation.
+
+- **/24** = 255.255.255.0 (Standard LAN)
+- **/25** = 255.255.255.128 (Half a /24)
+- **/30** = 255.255.255.252 (Used for Router-to-Router links)
+
+**Engineering Tip:** Always use /30 or /31 for point-to-point links to save IP space.`,
+      practical: {
+        goal: "Calculate the subnet mask for a /25 prefix. Type: 'mask --calc /25'",
+        expected: "mask --calc /25",
+        output: "Prefix: /25\nBinary: 11111111.11111111.11111111.10000000\nDecimal: 255.255.255.128"
+      },
+      quiz: [
+        { id: 1, q: "How many addresses are in a /24?", options: ["256", "128", "64"], correct: 0 },
+        { id: 2, q: "Which prefix is best for a simple two-router link?", options: ["/8", "/24", "/30"], correct: 2 }
+      ]
+    },
+    "lesson-5": {
+      title: "Public, Private, and NAT Logic",
+      duration: "60 mins",
+      content: `### The Great Translation
+Private IPs (e.g., 192.168.x.x) are not allowed on the public internet. **NAT** (Network Address Translation) is the process your router uses to swap your Private IP for its one Public IP.
+
+### Private Ranges:
+- **10.0.0.0** - 10.255.255.255
+- **172.16.0.0** - 172.31.255.255
+- **192.168.0.0** - 192.168.255.255
+
+**Learning Outcome:** Understand how thousands of devices can "hide" behind a single public IP address.`,
+      practical: {
+        goal: "Identify your public facing gateway address. Type: 'show nat --public'",
+        expected: "show nat --public",
+        output: "Internal: 192.168.1.105:5012\nTranslated: 203.0.113.42:5012\n[INFO] NAT Translation Active."
+      },
+      quiz: [
+        { id: 1, q: "Is 192.168.1.1 a Public or Private IP?", options: ["Public", "Private"], correct: 1 },
+        { id: 2, q: "What does NAT stand for?", options: ["Network Address Translation", "Net Access Tool", "Node Application Transfer"], correct: 0 }
+      ]
+    },
+    "lesson-6": {
+      title: "Binary Speed-Counting",
+      duration: "60 mins",
+      content: `### The Human Calculator
+To master subnetting, you must memorize the "Power of 2" values. 
+**The Magic Numbers:** 128, 64, 32, 16, 8, 4, 2, 1.
+
+### Example:
+To get 200 in binary:
+1. Is 200 > 128? **Yes** (1) -> 72 left.
+2. Is 72 > 64? **Yes** (1) -> 8 left.
+3. Is 8 > 32? No (0)
+4. Is 8 > 16? No (0)
+5. Is 8 >= 8? **Yes** (1) -> 0 left.
+Result: \`11001000\`
+
+**Learning Outcome:** Convert decimal to binary in your head in under 5 seconds.`,
+      practical: {
+        goal: "Convert decimal 168 to binary. Type: 'bin --convert 168'",
+        expected: "bin --convert 168",
+        output: "128 (1) + 64 (0) + 32 (1) + 16 (0) + 8 (1) + 4 (0) + 2 (0) + 1 (0)\nResult: 10101000\n[SUCCESS] Binary pattern recognized."
+      },
+      quiz: [
+        { id: 1, q: "What is the binary value of 128?", options: ["10000000", "11111111", "00000001"], correct: 0 },
+        { id: 2, q: "What is $2^4$?", options: ["8", "16", "32"], correct: 1 },
+        { id: 3, q: "How many bits are needed to create 16 subnets?", options: ["2", "4", "8"], correct: 1},
+      ]
+    },
+    "final-exam": {
+      title: "Subnetting: Grandmaster Evaluation",
+      questions: [
+        { q: "How many bits are in a single IPv4 address?", options: ["16", "32", "128"], correct: 1 },
+        { q: "What does CIDR notation '/24' represent in decimal?", options: ["255.255.0.0", "255.255.255.0", "255.0.0.0"], correct: 1 },
+        { q: "How many usable hosts are in a /24 network?", options: ["256", "254", "128"], correct: 1 },
+        { q: "Which formula calculates the number of usable hosts?", options: ["2^n", "2^n - 2", "n^2"], correct: 1 },
+        { q: "IPv6 addresses are written in which format?", options: ["Dotted Decimal", "Binary", "Hexadecimal"], correct: 2 },
+        { q: "What is the host increment for a /26 mask (255.255.255.192)?", options: ["32", "64", "128"], correct: 1 },
+        { q: "Which of these is a Private IP range?", options: ["8.8.8.0", "10.0.0.0/8", "203.0.113.0"], correct: 1 },
+        { q: "What is the binary equivalent of decimal 128?", options: ["11111111", "10000000", "00000001"], correct: 1 },
+        { q: "A /30 prefix is most commonly used for what?", options: ["Large Offices", "Point-to-point router links", "Home Wi-Fi"], correct: 1 },
+        { q: "What does NAT stand for?", options: ["Network Address Translation", "Node Access Table", "Net Application Terminal"], correct: 0 },
+        { q: "How many bits are in an IPv6 address?", options: ["32", "64", "128"], correct: 2 },
+        { q: "What is the Subnet Mask for a /27 prefix?", options: ["255.255.255.192", "255.255.255.224", "255.255.255.240"], correct: 1 },
+        { q: "Why do we subtract 2 when calculating usable hosts?", options: ["For the Gateway and DNS", "For the Network and Broadcast IDs", "For the Server and Client"], correct: 1 },
+        { q: "Which protocol allows a private network to share one public IP?", options: ["DHCP", "NAT", "DNS"], correct: 1 },
+        { q: "In binary counting, what is the value of the 3rd bit from the right (2^2)?", options: ["2", "4", "8"], correct: 1 }
+      ]
+    }
+  },
+  "ccna-mastery": {
+    title: "CCNA: Cisco Certified Associate",
+    threshold: 85,
+    rankAward: "Cisco Associate",
+    "lesson-1": {
+      title: "Introduction to Cisco IOS",
+      duration: "90 mins",
+      content: `### The Command Line Interface (CLI)
+Cisco devices run on **IOS (Internetwork Operating System)**. Understanding the modes is critical for any engineer.
+
+### Modes of Operation:
+1. **User EXEC Mode** (\`Router>\`): Limited view, diagnostic only.
+2. **Privileged EXEC Mode** (\`Router#\`): Detailed viewing and debugging.
+3. **Global Config Mode** (\`Router(config)#\`): Where the actual changes happen.
+
+**Learning Outcome:** Navigate modes and save configurations using \`write memory\`.`,
+      practical: {
+        goal: "Enter Privileged mode and then Global Config. Type: 'enable' followed by 'configure terminal'",
+        expected: "configure terminal",
+        output: "Router#\nEnter configuration commands, one per line. End with CNTL/Z.\nRouter(config)#"
+      },
+      quiz: [
+        { id: 1, q: "Which mode is indicated by the '#' prompt?", options: ["User mode", "Privileged mode", "Setup mode"], correct: 1 },
+        { id: 2, q: "What command takes you from Privileged to Global Config?", options: ["enable", "config t", "exit"], correct: 1 }
+      ]
+    },
+    "lesson-2": {
+      title: "VLANs & Trunking",
+      duration: "2 Hours",
+      content: `### Broadcast Domain Control
+By default, all ports on a switch are in VLAN 1. We create **VLANs** to break up broadcast domains for security and performance.
+
+### Trunking (802.1Q)
+A **Trunk** is a link that carries traffic for multiple VLANs between switches.
+
+**Learning Outcome:** Create a VLAN and assign it to a port.`,
+      practical: {
+        goal: "Create VLAN 10 named 'Sales'. Type: 'vlan 10' then 'name Sales'",
+        expected: "name Sales",
+        output: "Router(config-vlan)# name Sales\n[SUCCESS] VLAN 10 database updated."
+      },
+      quiz: [
+        { id: 1, q: "What protocol is used for trunking?", options: ["802.3ad", "802.1Q", "VTP"], correct: 1 }
+      ]
+    }
+    // ... add lessons 3-6 following CCNA curriculum ...
+  },
+
+  "ccnp-enterprise": {
+    title: "CCNP: Enterprise Core",
+    threshold: 85,
+    rankAward: "Enterprise Engineer",
+    "lesson-1": {
+      title: "Advanced Spanning Tree (MSTP/RPVST+)",
+      duration: "3 Hours",
+      content: `### Layer 2 Loop Prevention
+At the Professional level, standard STP is too slow. We use **Rapid-PVST+** or **MST (Multiple Spanning Tree)** to ensure sub-second convergence and load balancing.
+
+**Learning Outcome:** Influence the Root Bridge election by changing the priority.`,
+      practical: {
+        goal: "Set this switch as the Root Bridge for VLAN 10. Type: 'spanning-tree vlan 10 priority 4096'",
+        expected: "spanning-tree vlan 10 priority 4096",
+        output: "Recalculating STP Topology...\nSwitch is now ROOT for VLAN 10."
+      },
+      quiz: [
+        { id: 1, q: "What is the default STP priority?", options: ["32768", "4096", "1"], correct: 0 }
+      ]
+    }
+    // ... add lessons 2-6 (BGP, EIGRP, Automation) ...
+  },
+
+  "mikrotik-mtcna": {
+    title: "MikroTik: RouterOS Mastery",
+    threshold: 85,
+    rankAward: "MikroTik Certified",
+    "lesson-1": {
+      title: "Introduction to RouterOS CLI",
+      duration: "60 mins",
+      content: `### The MikroTik Logic
+MikroTik uses **RouterOS**. Unlike Cisco, commands are structured in directories.
+
+### Common Paths:
+- \`/ip address\`: IP management.
+- \`/interface\`: Physical/Virtual ports.
+- \`/ip firewall\`: Security rules.
+
+**Learning Outcome:** Print the current IP configuration.`,
+      practical: {
+        goal: "Print all assigned IP addresses. Type: '/ip address print'",
+        expected: "/ip address print",
+        output: "Flags: X - disabled, I - invalid, D - dynamic \n #   ADDRESS            NETWORK         INTERFACE\n 0   192.168.88.1/24    192.168.88.0    bridge"
+      },
+      quiz: [
+        { id: 1, q: "How do you go to the root menu in MikroTik CLI?", options: ["exit", "/", "back"], correct: 1 },
+        { id: 2, q: "What is the name of the MikroTik GUI tool?", options: ["Cisco View", "Winbox", "WebFig"], correct: 1 }
+      ]
+    }
+},
 };

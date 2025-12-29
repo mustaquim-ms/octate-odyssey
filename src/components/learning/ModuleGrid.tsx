@@ -64,6 +64,59 @@ const MODULE_DATA = {
       ]
     },
   ],
+  professional: [
+    { 
+      slug: "ccna-mastery",
+      title: "CCNA: Cisco Certified Associate", 
+      desc: "The gold standard. Master Cisco IOS, VLANs, OSPF, and Access Control Lists.", 
+      icon: <Cpu size={24} />, 
+      level: "Intermediate", 
+      duration: "40h", 
+      progress: 0,
+      lessons: [
+        "Intro to Cisco IOS", 
+        "VLANs & Trunking", 
+        "Inter-VLAN Routing", 
+        "OSPF Dynamic Routing", 
+        "ACL Security",
+        "NAT & DHCP Services"
+      ]
+    },
+    { 
+      slug: "ccnp-enterprise",
+      title: "CCNP: Enterprise Core", 
+      desc: "Advanced routing (BGP), Spanning Tree tuning, and High Availability design.", 
+      icon: <ShieldAlert size={24} />, 
+      level: "Advanced", 
+      duration: "60h", 
+      progress: 0,
+      lessons: [
+        "Advanced STP", 
+        "BGP Fundamentals", 
+        "EIGRP Optimization", 
+        "Wireless Architecture", 
+        "Virtualization & SD-Access",
+        "Network Automation"
+      ]
+    },
+    { 
+      slug: "mikrotik-mtcna",
+      title: "MikroTik: RouterOS Mastery", 
+      desc: "Master the swiss-army knife of networking. Queues, Firewall, and Winbox logic.", 
+      icon: <Zap size={24} />, 
+      level: "Intermediate", 
+      duration: "20h", 
+      progress: 0,
+      lessons: [
+        "RouterOS Basics", 
+        "Bridge & Switch Logic", 
+        "Routing & Static Paths", 
+        "Wireless & Capsman", 
+        "Mangle & QoS Queues",
+        "User Management"
+      ]
+    }
+  ],
   specialized: [
     { 
       slug: "osi-model",
@@ -74,11 +127,12 @@ const MODULE_DATA = {
       duration: "5h", 
       progress: 0,
       lessons: [
-        "Layer 1: Physical", 
-        "Layer 2: Data Link", 
-        "Layer 3: Network", 
-        "Layer 4: Transport", 
-        "Layers 5-7: Software Layers"
+        "Why Networking Needs Layers",
+        "OSI Layer Breakdown",
+        "TCP/IP and Real Traffic",
+        "Encapsulation Journey",
+        "Common Port Numbers",
+        "Diagnostic Tools Mastery"
       ]
     },
     { 
@@ -90,11 +144,12 @@ const MODULE_DATA = {
       duration: "6h", 
       progress: 0,
       lessons: [
-        "Binary Math", 
-        "IPv4 Subnetting", 
-        "CIDR & VLSM", 
-        "IPv6 Addressing", 
-        "Subnetting Speedrun"
+        "IP Address Structure",
+        "Subnetting Math Step-by-Step",
+        "IPv6 Explained Clearly",
+        "CIDR & Slash Notation",
+        "NAT & Private IP Logic",
+        "Binary Speed-Counting"
       ]
     },
     { 

@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation"; // Import this to detect current 
 import { 
   User, Settings, Shield, Key, Trophy, 
   ChevronDown, Rocket, LayoutDashboard, 
-  Binary, Target, BarChart3 
+  Binary, Target, BarChart3, Book
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import AuthModal from "@/components/auth/AuthModal";
@@ -24,6 +24,7 @@ export default function Navbar() {
     { name: "Games", href: "/games", icon: <Rocket size={14} /> },
     { name: "Missions", href: "/missions", icon: <Target size={14} /> },
     { name: "Leaderboard", href: "/leaderboard", icon: <BarChart3 size={14} /> },
+    { name: "Resources", href: "/resources", icon: <Book size={14} /> },
   ];
 
   return (
