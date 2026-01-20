@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { CheckCircle2, XCircle, Trophy } from "lucide-react";
+import { supabase } from "@/lib/supabase"; 
 
 interface Question {
   id: number;

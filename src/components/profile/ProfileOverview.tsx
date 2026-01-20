@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { Trophy, Star, Target, Activity, Award } from "lucide-react";
+import { supabase } from "@/lib/supabase"; 
 
 export default function ProfileOverview() {
   const [NavigatorName, setNavigatorName] = useState("Navigator");

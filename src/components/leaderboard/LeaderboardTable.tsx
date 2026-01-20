@@ -1,5 +1,6 @@
 "use client";
 import { Globe, ShieldCheck, Zap } from "lucide-react";
+import { supabase } from "@/lib/supabase"; 
 
 const DATA = [
     { rank: 4, name: "Subnet_God", tier: "Samurai", xp: "32,400", country: "USA", change: "up" },
