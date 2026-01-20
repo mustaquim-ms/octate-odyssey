@@ -17,8 +17,11 @@ const jetbrains = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Octate Odyssey | Elite Networking Hub",
-  description: "Master the Digital Frontier of Computer Networks",
+  title: "Octate Odyssey | Master the Matrix",
+  description: "Elite Computer Networking Learning Platform",
+  openGraph: {
+    images: ['/opengraph-image.png'],
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

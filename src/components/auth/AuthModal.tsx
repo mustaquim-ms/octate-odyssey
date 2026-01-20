@@ -1,8 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from "framer-motion";
-import Link from "next/link";
-import { supabase } from "@/lib/supabase"; // IMPORT SUPABASE CLIENT
+import { supabase } from "@/lib/supabase"; 
 import { 
   X, Lock, User, Power, AlertCircle, 
   Fingerprint, ShieldCheck, ChevronRight, 
@@ -12,9 +11,9 @@ import {
 export default function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const [isLogin, setIsLogin] = useState(true);
   const [username, setUsername] = useState("");
-  const [email, setEmail] = useState(""); // ADDED EMAIL STATE
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false); // ADDED LOADING STATE
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   // FIX: Prevent background scrolling when modal is open
@@ -56,43 +55,52 @@ export default function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClos
     setLoading(true);
     setError("");
 
-    if (isLogin) {
-      // 1. LOGIN LOGIC
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: email,
-        password: password,
-      });
+    try {
+      if (isLogin) {
+        // 1. LOGIN LOGIC
+        const { data, error: loginError } = await supabase.auth.signInWithPassword({
+          email: email,
+          password: password,
+        });
 
-      if (error) {
-        setError(error.message.toUpperCase());
-      } else {
-        localStorage.setItem("pilot_session", "active");
-        localStorage.setItem("pilot_name", data.user.user_metadata.username || "Pilot");
-        localStorage.setItem("pilot_handle", data.user.user_metadata.username || "navigator");
-        window.location.reload(); 
-      }
-    } else {
-      // 2. SIGNUP LOGIC
-      const { data, error } = await supabase.auth.signUp({
-        email: email,
-        password: password,
-        options: {
-          data: {
-            username: username,
-            rank: 'Novice',
-            xp: 0
-          }
+        if (loginError) throw loginError;
+
+        if (data.user) {
+          // Success: Sync local storage for your existing UI components
+          localStorage.setItem("pilot_session", "active");
+          localStorage.setItem("pilot_name", data.user.user_metadata?.username || "Navigator");
+          localStorage.setItem("pilot_handle", data.user.user_metadata?.username?.toLowerCase() || "navigator");
+          window.location.reload(); 
         }
-      });
-
-      if (error) {
-        setError(error.message.toUpperCase());
       } else {
-        alert("ENCRYPTION KEY SENT: Please check your email to verify your signature.");
-        onClose();
+        // 2. SIGNUP LOGIC
+        const { data, error: signupError } = await supabase.auth.signUp({
+          email: email,
+          password: password,
+          options: {
+            data: {
+              username: username,
+              rank: 'Novice',
+              xp: 0
+            },
+            // Email confirmation is on by default in Supabase. 
+            // You can disable it in Supabase Dashboard > Auth > Providers > Email
+            emailRedirectTo: window.location.origin
+          }
+        });
+
+        if (signupError) throw signupError;
+
+        if (data.user) {
+          alert("REGISTRY INITIATED: Please check your email to verify your signature and activate your ID Card.");
+          onClose();
+        }
       }
+    } catch (err: any) {
+      setError(err.message.toUpperCase());
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
@@ -172,7 +180,7 @@ export default function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClos
                 <AuthInput icon={<Lock size={18} />} placeholder="ACCESS_KEY" type="password" value={password} onChange={setPassword} />
 
                 {error && (
-                  <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-2 text-[#ff4d4d] font-mono text-[9px] font-black uppercase bg-red-500/5 p-4 rounded-xl border border-red-500/20">
+                  <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-2 text-[#ff4d4d] font-mono text-[10px] font-black uppercase bg-red-500/5 p-4 rounded-xl border border-red-500/20">
                     <AlertCircle size={16} /> {error}
                   </motion.div>
                 )}
@@ -200,8 +208,8 @@ export default function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClos
               </div>
 
               <div className="mt-8 text-center">
-                <button onClick={() => { setIsLogin(!isLogin); setError(""); }} className="text-[10px] font-mono font-black text-gray-500 hover:text-white uppercase tracking-widest cursor-pointer transition-colors">
-                  {isLogin ? "Generate New Signature" : "Return to Terminal"}
+                <button onClick={() => { setIsLogin(!isLogin); setError(""); }} className="text-[10px] font-mono font-black text-gray-500 hover:text-white uppercase tracking-widest cursor-pointer transition-colors text-center w-full">
+                  {isLogin ? "Generate New Signature" : "Access Existing Terminal"}
                 </button>
               </div>
             </motion.div>
