@@ -17,27 +17,21 @@ const jetbrains = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Octate Odyssey | Master the Matrix",
-  description: "Elite Computer Networking Learning Platform",
-  openGraph: {
-    images: ['/opengraph-image.png'],
-  },
+  title: "Octate Odyssey | Elite Networking Hub",
+  description: "Master the Digital Frontier",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${outfit.variable} ${jetbrains.variable} antialiased bg-[#020617] text-white`} suppressHydrationWarning>
-        {children}
-      </body>
-    </html>
-  );
-}
-
-export default function RootLayout({ children }) {
-  return (
-    <html lang="en" suppressHydrationWarning>
-      <body className="...">
+      <body
+        className={`${outfit.variable} ${jetbrains.variable} antialiased bg-[#020617] text-white`}
+        suppressHydrationWarning
+      >
         {children}
         <Analytics />
         <SpeedInsights />
