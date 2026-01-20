@@ -54,6 +54,7 @@ const RESOURCE_CARDS = [
 
 export default function ResourcesPage() {
   const [activeTool, setActiveTool] = useState<string | null>(null);
+  const closeTool = () => setActiveTool(null);
   const { checkAuth } = useAuthGuard();
 
   const handleToolInitialize = (id: string) => {
