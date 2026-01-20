@@ -8,15 +8,33 @@ import {
   Github, Chrome, Mail 
 } from "lucide-react";
 
-export default function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
-  const [isLogin, setIsLogin] = useState(true);
+interface AuthModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  initialMode?: "login" | "signup"; // Added to handle specific mode from Navbar
+}
+
+export default function AuthModal({ 
+  isOpen, 
+  onClose, 
+  initialMode = "login" 
+}: { 
+  isOpen: boolean; 
+  onClose: () => void; 
+  initialMode?: "login" | "signup";
+}) {
+  const [isLogin, setIsLogin] = useState(initialMode === "login");
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // FIX: Prevent background scrolling when modal is open
+  // Sync isLogin state with the prop when modal opens
+  useEffect(() => {
+    setIsLogin(initialMode === "login");
+  }, [isOpen, initialMode]);
+
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
@@ -47,9 +65,14 @@ export default function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClos
     y.set(0);
   };
 
-  if (!isOpen) return null;
+  const handleSocialLogin = async (provider: 'google' | 'github') => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: { redirectTo: window.location.origin }
+    });
+    if (error) setError(error.message.toUpperCase());
+  };
 
-  // REAL SUPABASE AUTH IMPLEMENTATION
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -57,42 +80,27 @@ export default function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClos
 
     try {
       if (isLogin) {
-        // 1. LOGIN LOGIC
         const { data, error: loginError } = await supabase.auth.signInWithPassword({
-          email: email,
-          password: password,
+          email,
+          password,
         });
-
         if (loginError) throw loginError;
-
         if (data.user) {
-          // Success: Sync local storage for your existing UI components
-          localStorage.setItem("pilot_session", "active");
-          localStorage.setItem("pilot_name", data.user.user_metadata?.username || "Navigator");
-          localStorage.setItem("pilot_handle", data.user.user_metadata?.username?.toLowerCase() || "navigator");
+          localStorage.setItem("Navigator_name", data.user.user_metadata?.username || "Navigator");
           window.location.reload(); 
         }
       } else {
-        // 2. SIGNUP LOGIC
         const { data, error: signupError } = await supabase.auth.signUp({
-          email: email,
-          password: password,
+          email,
+          password,
           options: {
-            data: {
-              username: username,
-              rank: 'Novice',
-              xp: 0
-            },
-            // Email confirmation is on by default in Supabase. 
-            // You can disable it in Supabase Dashboard > Auth > Providers > Email
+            data: { username, rank: 'Novice', xp: 0 },
             emailRedirectTo: window.location.origin
           }
         });
-
         if (signupError) throw signupError;
-
         if (data.user) {
-          alert("REGISTRY INITIATED: Please check your email to verify your signature and activate your ID Card.");
+          alert("REGISTRY INITIATED: Check your email to verify your signature.");
           onClose();
         }
       }
@@ -103,13 +111,12 @@ export default function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClos
     }
   };
 
+  if (!isOpen) return null;
+
   return (
     <div className="fixed top-0 left-0 w-screen h-screen z-[999] flex items-center justify-center p-4 md:p-10 pointer-events-auto">
-      
       <motion.div 
-        initial={{ opacity: 0 }} 
-        animate={{ opacity: 1 }} 
-        exit={{ opacity: 0 }} 
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} 
         onClick={onClose} 
         className="absolute inset-0 bg-[#020617]/95 backdrop-blur-xl cursor-crosshair" 
       />
@@ -121,11 +128,12 @@ export default function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClos
         initial={{ scale: 0.9, opacity: 0, y: 50 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
         exit={{ scale: 0.9, opacity: 0, y: 50 }}
-        className="relative w-full max-w-[950px] bg-[#0a101f] border border-white/10 rounded-[48px] shadow-[0_50px_100px_rgba(0,0,0,0.9)] flex overflow-hidden group auth-card-shadow"
+        className="relative w-full max-w-[950px] aspect-[1.6/1] bg-[#0a101f] border border-white/10 rounded-[48px] shadow-[0_50px_100px_rgba(0,0,0,0.9)] flex overflow-hidden group"
       >
-        <div className="absolute inset-0 border-[16px] border-white/[0.02] rounded-[48px] pointer-events-none z-50" />
+        {/* FIXED: Reduced border thickness and ensured it doesn't block clicks */}
+        <div className="absolute inset-0 border-[12px] border-white/[0.02] rounded-[48px] pointer-events-none z-[60]" />
         
-        {/* LEFT SIDE: Identity Section */}
+        {/* LEFT SIDE */}
         <div className="hidden md:flex w-[45%] bg-gradient-to-br from-[#0a101f] via-black to-[#0a101f] p-12 flex-col justify-between relative border-r border-white/5">
            <div className="space-y-3">
               <div className="flex items-center gap-2">
@@ -139,7 +147,7 @@ export default function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClos
 
            <div className="relative w-48 h-48 mx-auto">
               <div className="absolute inset-0 bg-[#7ed957] blur-[60px] opacity-10" />
-              <div className="w-full h-full bg-black/40 border border-white/10 rounded-[32px] flex items-center justify-center relative overflow-hidden shadow-inner transition-all duration-700">
+              <div className="w-full h-full bg-black/40 border border-white/10 rounded-[32px] flex items-center justify-center relative overflow-hidden shadow-inner">
                  <Fingerprint size={80} className={loading ? "text-[#ffb423] animate-pulse" : email ? "text-[#7ed957]" : "text-gray-800"} />
                  <div className="absolute bottom-0 left-0 w-full py-2 bg-[#7ed957]/5 backdrop-blur-md text-center border-t border-white/5">
                     <span className="font-mono text-[8px] text-[#7ed957] uppercase font-black">{loading ? "Synchronizing..." : "Biometric Sync Active"}</span>
@@ -152,10 +160,10 @@ export default function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClos
            </p>
         </div>
 
-        {/* RIGHT SIDE: Auth Form */}
-        <div className="flex-1 p-10 md:p-14 bg-black/20 backdrop-blur-sm relative z-10">
-          <button onClick={onClose} className="absolute top-8 right-8 text-gray-600 hover:text-[#ff4d4d] transition-colors cursor-pointer group">
-             <X size={24} className="group-hover:rotate-90 transition-transform" />
+        {/* RIGHT SIDE */}
+        <div className="flex-1 p-10 md:p-14 bg-black/20 backdrop-blur-sm relative z-10 overflow-y-auto">
+          <button onClick={onClose} className="absolute top-8 right-8 text-gray-600 hover:text-[#ff4d4d] transition-colors cursor-pointer z-[70]">
+             <X size={24} className="hover:rotate-90 transition-transform" />
           </button>
 
           <AnimatePresence mode="wait">
@@ -180,35 +188,40 @@ export default function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClos
                 <AuthInput icon={<Lock size={18} />} placeholder="ACCESS_KEY" type="password" value={password} onChange={setPassword} />
 
                 {error && (
-                  <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-2 text-[#ff4d4d] font-mono text-[10px] font-black uppercase bg-red-500/5 p-4 rounded-xl border border-red-500/20">
+                  <div className="flex items-center gap-2 text-[#ff4d4d] font-mono text-[10px] font-black uppercase bg-red-500/5 p-4 rounded-xl border border-red-500/20">
                     <AlertCircle size={16} /> {error}
-                  </motion.div>
+                  </div>
                 )}
 
                 <button 
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-[#7ed957] disabled:opacity-50 text-black font-black uppercase font-mono text-xs py-6 rounded-2xl flex items-center justify-between px-10 hover:bg-[#ffb423] transition-all cursor-pointer shadow-[0_20px_40px_rgba(126,217,87,0.2)] group"
+                  className="w-full bg-[#7ed957] disabled:opacity-50 text-black font-black uppercase font-mono text-xs py-6 rounded-2xl flex items-center justify-between px-10 hover:bg-[#ffb423] transition-all cursor-pointer shadow-lg group"
                 >
                   <div className="flex items-center gap-4">
-                    <Power size={18} className={loading ? "animate-spin" : "group-hover:rotate-90 transition-transform duration-500"} />
+                    <Power size={18} className={loading ? "animate-spin" : "group-hover:rotate-90 transition-transform"} />
                     <span className="tracking-widest">{loading ? "SYNCING..." : isLogin ? "Engage Uplink" : "Create Signature"}</span>
                   </div>
                   <ChevronRight className="group-hover:translate-x-2 transition-transform" />
                 </button>
               </form>
 
-              {/* SOCIAL BUTTONS */}
+              {/* SOCIAL BUTTONS WITH REAL HANDLERS */}
               <div className="mt-10 pt-8 border-t border-white/5">
                 <div className="flex gap-4">
-                  <SocialPill icon={<Chrome size={20} />} color="#7ed957" />
-                  <SocialPill icon={<Github size={20} />} color="#ffb423" />
-                  <SocialPill icon={<ShieldCheck size={20} />} color="#7ed957" />
+                  <SocialPill onClick={() => handleSocialLogin('google')} icon={<Chrome size={20} />} color="#7ed957" />
+                  <SocialPill onClick={() => handleSocialLogin('github')} icon={<Github size={20} />} color="#ffb423" />
+                  <SocialPill onClick={() => {}} icon={<ShieldCheck size={20} />} color="#7ed957" />
                 </div>
               </div>
 
-              <div className="mt-8 text-center">
-                <button onClick={() => { setIsLogin(!isLogin); setError(""); }} className="text-[10px] font-mono font-black text-gray-500 hover:text-white uppercase tracking-widest cursor-pointer transition-colors text-center w-full">
+              {/* FIXED: Toggle button made as a proper clickable element */}
+              <div className="mt-8 text-center relative z-[80]">
+                <button 
+                  type="button"
+                  onClick={() => { setIsLogin(!isLogin); setError(""); }} 
+                  className="text-[10px] font-mono font-black text-gray-500 hover:text-white uppercase tracking-widest cursor-pointer transition-colors py-2 px-4"
+                >
                   {isLogin ? "Generate New Signature" : "Access Existing Terminal"}
                 </button>
               </div>
@@ -233,9 +246,14 @@ function AuthInput({ icon, placeholder, type = "text", value, onChange }: any) {
     );
 }
 
-function SocialPill({ icon, color }: any) {
+function SocialPill({ icon, color, onClick }: any) {
     return (
-      <button className="flex-1 flex items-center justify-center py-4 bg-white/[0.02] border border-white/10 rounded-2xl hover:bg-white/[0.05] transition-all cursor-pointer group shadow-lg" style={{ borderBottom: `2px solid ${color}33` }}>
+      <button 
+        type="button"
+        onClick={onClick}
+        className="flex-1 flex items-center justify-center py-4 bg-white/[0.02] border border-white/10 rounded-2xl hover:bg-white/[0.05] transition-all cursor-pointer group shadow-lg z-[80]" 
+        style={{ borderBottom: `2px solid ${color}33` }}
+      >
         <div className="transition-transform duration-500 group-hover:scale-125" style={{ color }}>{icon}</div>
       </button>
     );

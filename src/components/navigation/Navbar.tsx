@@ -1,5 +1,4 @@
 "use client";
-// Add this line at the top
 import { supabase } from "@/lib/supabase";
 import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
@@ -23,49 +22,72 @@ function NavbarContent() {
   const [showProfile, setShowProfile] = useState(false);
   const [hoveredPath, setHoveredPath] = useState("");
   const [isAuthOpen, setIsAuthOpen] = useState(false);
-
-  // Inside NavbarContent component
-useEffect(() => {
-  setMounted(true);
   
-  // Get active session from Supabase
-  const getSession = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    setIsLoggedIn(!!session);
-  };
-  getSession();
+  // NEW: State to determine if modal opens as Login or Sign Up
+  const [authMode, setAuthMode] = useState<"login" | "signup">("login");
 
-  // Listen for login/logout changes automatically
-  const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-    setIsLoggedIn(!!session);
-  });
+  // 1. Initial Session Check & Real-time Auth Listener
+  useEffect(() => {
+    setMounted(true);
+    
+    const getSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setIsLoggedIn(!!session);
+      if (session?.user) {
+        // Sync metadata to localStorage for non-auth components
+        localStorage.setItem("Navigator_name", session.user.user_metadata?.username || "Navigator");
+      }
+    };
+    getSession();
 
-  return () => subscription.unsubscribe();
-}, []);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsLoggedIn(!!session);
+      if (session) {
+        localStorage.setItem("Navigator_session", "active");
+      } else {
+        localStorage.removeItem("Navigator_session");
+      }
+    });
 
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // 2. Listen for URL parameters (?auth=login or ?auth=signup)
   useEffect(() => {
     const authRequest = searchParams.get("auth");
     if (authRequest === "login") {
+      setAuthMode("login");
+      setIsAuthOpen(true);
+    } else if (authRequest === "signup") {
+      setAuthMode("signup");
       setIsAuthOpen(true);
     }
   }, [searchParams]);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
     localStorage.removeItem("Navigator_session");
     localStorage.removeItem("Navigator_name");
     localStorage.removeItem("Navigator_handle");
     setIsLoggedIn(false);
     setShowProfile(false);
     router.push("/");
-    window.location.reload();
+    router.refresh();
   };
 
   const handleCloseAuth = () => {
     setIsAuthOpen(false);
+    // Remove the ?auth parameter from the URL to prevent re-opening on refresh
     const params = new URLSearchParams(searchParams.toString());
     params.delete("auth");
     const newPath = pathname + (params.toString() ? `?${params.toString()}` : "");
     router.replace(newPath, { scroll: false });
+  };
+
+  // Helper to open modal in specific mode
+  const openAuth = (mode: "login" | "signup") => {
+    setAuthMode(mode);
+    setIsAuthOpen(true);
   };
 
   const menuItems = [
@@ -84,6 +106,7 @@ useEffect(() => {
       <nav className="fixed top-0 w-full z-50 border-b border-[#7ed957]/10 bg-[#020617]/70 backdrop-blur-2xl">
         <div className="max-w-[1600px] mx-auto px-10 h-28 flex items-center justify-between">
           
+          {/* Logo Section */}
           <Link href="/" className="flex items-center group cursor-pointer">
             <Image 
               src="/logo.png" 
@@ -95,6 +118,7 @@ useEffect(() => {
             />
           </Link>
 
+          {/* Center Menu with Restored Glass Hover Effect */}
           <div className="hidden xl:flex items-center bg-white/[0.03] border border-white/10 rounded-full px-2 py-1 relative">
             {menuItems.map((item) => {
               const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
@@ -111,7 +135,7 @@ useEffect(() => {
                   {item.icon}
                   <span>{item.name}</span>
 
-                  {/* ACTIVE BACKGROUND PILL */}
+                  {/* Active Background Pill */}
                   {isActive && (
                     <motion.div 
                       layoutId="active-pill"
@@ -120,7 +144,7 @@ useEffect(() => {
                     />
                   )}
 
-                  {/* RESTORED: GLASS HOVER EFFECT PILL */}
+                  {/* GLASS HOVER EFFECT PILL (Restored) */}
                   {hoveredPath === item.name && !isActive && (
                     <motion.div 
                       layoutId="nav-hover-glow"
@@ -132,7 +156,7 @@ useEffect(() => {
                     />
                   )}
 
-                  {/* ACTIVE UNDERLINE GLOW */}
+                  {/* Active Underline Glow */}
                   {isActive && (
                     <motion.div 
                       layoutId="active-line"
@@ -144,18 +168,30 @@ useEffect(() => {
             })}
           </div>
 
+          {/* Right Section: Auth or Navigator Profile */}
           <div className="flex items-center gap-6">
             {!isLoggedIn ? (
               <div className="flex items-center gap-8 font-mono">
-                <button onClick={() => setIsAuthOpen(true)} className="text-xs font-bold tracking-widest uppercase hover:text-[#ffb423] cursor-pointer text-gray-400 transition-colors">Login</button>
-                <button onClick={() => setIsAuthOpen(true)} className="relative group px-8 py-4 overflow-hidden rounded-sm cursor-pointer transition-all">
-                  <div className="absolute inset-0 bg-gradient-to-r from-[#ffb423] to-[#7ed957]" />
+                <button 
+                  onClick={() => openAuth("login")} 
+                  className="text-xs font-bold tracking-widest uppercase hover:text-[#ffb423] cursor-pointer text-gray-400 transition-colors"
+                >
+                  Login
+                </button>
+                <button 
+                  onClick={() => openAuth("signup")} 
+                  className="relative group px-8 py-4 overflow-hidden rounded-sm cursor-pointer transition-all"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-[#ffb423] to-[#7ed957] shadow-[0_0_20px_rgba(126,217,87,0.2)]" />
                   <span className="relative text-black text-[11px] font-black tracking-widest uppercase">Join Odyssey</span>
                 </button>
               </div>
             ) : (
               <div className="relative">
-                <button onClick={() => setShowProfile(!showProfile)} className="flex items-center gap-4 bg-white/5 border border-white/10 rounded-full p-2 pr-6 hover:bg-white/10 transition cursor-pointer">
+                <button 
+                  onClick={() => setShowProfile(!showProfile)} 
+                  className="flex items-center gap-4 bg-white/5 border border-white/10 rounded-full p-2 pr-6 hover:bg-white/10 transition cursor-pointer"
+                >
                   <div className="w-12 h-12 rounded-full border-2 border-[#7ed957] overflow-hidden p-1 shadow-[0_0_15px_rgba(126,217,87,0.2)]">
                     <div className="w-full h-full rounded-full bg-gradient-to-br from-[#ffb423] to-[#7ed957] flex items-center justify-center text-black font-black uppercase text-sm">
                        {localStorage.getItem("Navigator_name")?.[0] || "N"}
@@ -172,20 +208,25 @@ useEffect(() => {
 
                 <AnimatePresence>
                   {showProfile && (
-                    <motion.div initial={{ opacity: 0, y: 10, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 10, scale: 0.95 }} className="absolute right-0 mt-4 w-72 bg-[#0a101f] border border-[#7ed957]/30 rounded-2xl shadow-2xl p-3 z-50 overflow-hidden">
+                    <motion.div 
+                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                      className="absolute right-0 mt-4 w-72 bg-[#0a101f] border border-[#7ed957]/30 rounded-2xl shadow-2xl p-3 z-50 overflow-hidden"
+                    >
                       <div className="bg-[#7ed957]/5 p-5 rounded-xl border border-[#7ed957]/10 mb-2 font-mono">
-                        <div className="flex justify-between items-center mb-1">
-                          <span className="text-[9px] uppercase tracking-widest text-[#7ed957] font-black">Registry Rank</span>
+                        <div className="flex justify-between items-center mb-1 text-[#7ed957]">
+                          <span className="text-[9px] uppercase tracking-widest font-black">Registry Rank</span>
                           <Trophy size={14} className="text-[#ffb423]" />
                         </div>
                         <p className="text-lg font-[family-name:var(--font-outfit)] font-[900] text-white uppercase tracking-tight">Subnet Samurai</p>
                       </div>
 
                       <div className="space-y-1">
-                        <Link href="/leaderboard"><DropdownItem icon={<Trophy size={14}/>} text="User Ranks" /></Link>
-                        <Link href="/profile"><DropdownItem icon={<Settings size={14}/>} text="Settings" /></Link>
-                        <Link href="/profile"><DropdownItem icon={<Shield size={14}/>} text="Security & MFA" /></Link>
-                        <Link href="/profile"><DropdownItem icon={<Key size={14}/>} text="Password" /></Link>
+                        <Link href="/leaderboard" onClick={() => setShowProfile(false)}><DropdownItem icon={<Trophy size={14}/>} text="User Ranks" /></Link>
+                        <Link href="/profile" onClick={() => setShowProfile(false)}><DropdownItem icon={<Settings size={14}/>} text="Settings" /></Link>
+                        <Link href="/profile" onClick={() => setShowProfile(false)}><DropdownItem icon={<Shield size={14}/>} text="Security & MFA" /></Link>
+                        <Link href="/profile" onClick={() => setShowProfile(false)}><DropdownItem icon={<Key size={14}/>} text="Password" /></Link>
                       </div>
 
                       <button 
@@ -207,7 +248,8 @@ useEffect(() => {
         {isAuthOpen && (
           <AuthModal 
             isOpen={isAuthOpen} 
-            onClose={handleCloseAuth} 
+            onClose={handleCloseAuth}
+            initialMode={authMode} // Pass the mode to the modal
           />
         )}
       </AnimatePresence>
@@ -225,7 +267,7 @@ export default function Navbar() {
 
 function DropdownItem({ icon, text }: { icon: any; text: string }) {
   return (
-    <div className="w-full flex items-center gap-4 px-4 py-3.5 text-gray-400 hover:bg-white/5 hover:text-white rounded-xl transition cursor-pointer font-mono text-[10px] font-black uppercase tracking-widest group">
+    <div className="w-full flex items-center gap-4 px-4 py-3.5 text-gray-400 hover:bg-white/5 hover:text-white rounded-xl transition cursor-pointer font-mono text-[10px] font-black uppercase tracking-widest group text-left">
       <span className="text-gray-600 group-hover:text-[#ffb423] transition-colors">{icon}</span>
       <span className="font-bold tracking-tight">{text}</span>
     </div>
