@@ -1,6 +1,8 @@
 "use client";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from "framer-motion";
+import Link from "next/link";
+import { supabase } from "@/lib/supabase"; // IMPORT SUPABASE CLIENT
 import { 
   X, Lock, User, Power, AlertCircle, 
   Fingerprint, ShieldCheck, ChevronRight, 
@@ -10,7 +12,9 @@ import {
 export default function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const [isLogin, setIsLogin] = useState(true);
   const [username, setUsername] = useState("");
+  const [email, setEmail] = useState(""); // ADDED EMAIL STATE
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false); // ADDED LOADING STATE
   const [error, setError] = useState("");
 
   // FIX: Prevent background scrolling when modal is open
@@ -46,23 +50,54 @@ export default function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClos
 
   if (!isOpen) return null;
 
-  const handleSimulatedAuth = () => {
-    if ((username === "sabrihin" && password === "odyssey2025") || (username === "admin" && password === "admin123")) {
-      localStorage.setItem("pilot_session", "active");
-      localStorage.setItem("pilot_name", username === "sabrihin" ? "Sabrihin" : "Admin");
-      localStorage.setItem("pilot_handle", username);
-      window.location.reload(); 
+  // REAL SUPABASE AUTH IMPLEMENTATION
+  const handleAuth = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+
+    if (isLogin) {
+      // 1. LOGIN LOGIC
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email,
+        password: password,
+      });
+
+      if (error) {
+        setError(error.message.toUpperCase());
+      } else {
+        localStorage.setItem("pilot_session", "active");
+        localStorage.setItem("pilot_name", data.user.user_metadata.username || "Pilot");
+        localStorage.setItem("pilot_handle", data.user.user_metadata.username || "navigator");
+        window.location.reload(); 
+      }
     } else {
-      setError("SIGNATURE MISMATCH: ACCESS DENIED");
-      setTimeout(() => setError(""), 3000);
+      // 2. SIGNUP LOGIC
+      const { data, error } = await supabase.auth.signUp({
+        email: email,
+        password: password,
+        options: {
+          data: {
+            username: username,
+            rank: 'Novice',
+            xp: 0
+          }
+        }
+      });
+
+      if (error) {
+        setError(error.message.toUpperCase());
+      } else {
+        alert("ENCRYPTION KEY SENT: Please check your email to verify your signature.");
+        onClose();
+      }
     }
+    setLoading(false);
   };
 
   return (
-    // FULL VIEWPORT CONTAINER - GUARANTEED CENTERING
     <div className="fixed top-0 left-0 w-screen h-screen z-[999] flex items-center justify-center p-4 md:p-10 pointer-events-auto">
       
-      {/* 1. Backdrop */}
       <motion.div 
         initial={{ opacity: 0 }} 
         animate={{ opacity: 1 }} 
@@ -71,7 +106,6 @@ export default function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClos
         className="absolute inset-0 bg-[#020617]/95 backdrop-blur-xl cursor-crosshair" 
       />
 
-      {/* 2. 3D ID Card - Perfectly Centered */}
       <motion.div
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
@@ -81,7 +115,6 @@ export default function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClos
         exit={{ scale: 0.9, opacity: 0, y: 50 }}
         className="relative w-full max-w-[950px] bg-[#0a101f] border border-white/10 rounded-[48px] shadow-[0_50px_100px_rgba(0,0,0,0.9)] flex overflow-hidden group auth-card-shadow"
       >
-        {/* Decorative Frame */}
         <div className="absolute inset-0 border-[16px] border-white/[0.02] rounded-[48px] pointer-events-none z-50" />
         
         {/* LEFT SIDE: Identity Section */}
@@ -89,7 +122,7 @@ export default function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClos
            <div className="space-y-3">
               <div className="flex items-center gap-2">
                  <div className="w-2 h-2 rounded-full bg-[#7ed957] animate-pulse" />
-                 <span className="text-[#ffb423] font-mono text-[10px] font-black uppercase tracking-[0.5em]">Auth_Session // v2.0</span>
+                 <span className="text-[#ffb423] font-mono text-[10px] font-black uppercase tracking-[0.5em]">Live_Auth // Supabase</span>
               </div>
               <h2 className="font-[family-name:var(--font-outfit)] text-5xl font-black uppercase text-white leading-[0.9] tracking-tighter">
                 NAVIGATOR <br /><span className="text-[#7ed957]">ID_CARD</span>
@@ -99,9 +132,9 @@ export default function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClos
            <div className="relative w-48 h-48 mx-auto">
               <div className="absolute inset-0 bg-[#7ed957] blur-[60px] opacity-10" />
               <div className="w-full h-full bg-black/40 border border-white/10 rounded-[32px] flex items-center justify-center relative overflow-hidden shadow-inner transition-all duration-700">
-                 <Fingerprint size={80} className={username ? "text-[#7ed957]" : "text-gray-800"} />
+                 <Fingerprint size={80} className={loading ? "text-[#ffb423] animate-pulse" : email ? "text-[#7ed957]" : "text-gray-800"} />
                  <div className="absolute bottom-0 left-0 w-full py-2 bg-[#7ed957]/5 backdrop-blur-md text-center border-t border-white/5">
-                    <span className="font-mono text-[8px] text-[#7ed957] uppercase font-black">Biometric Sync Active</span>
+                    <span className="font-mono text-[8px] text-[#7ed957] uppercase font-black">{loading ? "Synchronizing..." : "Biometric Sync Active"}</span>
                  </div>
               </div>
            </div>
@@ -131,8 +164,11 @@ export default function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClos
                 <p className="text-gray-500 font-mono text-[10px] mt-1 uppercase font-black tracking-[0.3em]">Sector clearance required</p>
               </div>
 
-              <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>
-                <AuthInput icon={<User size={18} />} placeholder="NAV_USERNAME" value={username} onChange={setUsername} />
+              <form className="space-y-4" onSubmit={handleAuth}>
+                {!isLogin && (
+                    <AuthInput icon={<User size={18} />} placeholder="CHOOSE_USERNAME" value={username} onChange={setUsername} />
+                )}
+                <AuthInput icon={<Mail size={18} />} placeholder="EMAIL_ADDRESS" type="email" value={email} onChange={setEmail} />
                 <AuthInput icon={<Lock size={18} />} placeholder="ACCESS_KEY" type="password" value={password} onChange={setPassword} />
 
                 {error && (
@@ -142,19 +178,20 @@ export default function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClos
                 )}
 
                 <button 
-                  onClick={handleSimulatedAuth}
-                  className="w-full bg-[#7ed957] text-black font-black uppercase font-mono text-xs py-5 rounded-2xl flex items-center justify-between px-10 hover:bg-[#ffb423] transition-all cursor-pointer shadow-[0_20px_40px_rgba(126,217,87,0.2)] group"
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-[#7ed957] disabled:opacity-50 text-black font-black uppercase font-mono text-xs py-6 rounded-2xl flex items-center justify-between px-10 hover:bg-[#ffb423] transition-all cursor-pointer shadow-[0_20px_40px_rgba(126,217,87,0.2)] group"
                 >
                   <div className="flex items-center gap-4">
-                    <Power size={18} className="group-hover:rotate-90 transition-transform duration-500" />
-                    <span className="tracking-widest">Engage Uplink</span>
+                    <Power size={18} className={loading ? "animate-spin" : "group-hover:rotate-90 transition-transform duration-500"} />
+                    <span className="tracking-widest">{loading ? "SYNCING..." : isLogin ? "Engage Uplink" : "Create Signature"}</span>
                   </div>
                   <ChevronRight className="group-hover:translate-x-2 transition-transform" />
                 </button>
               </form>
 
               {/* SOCIAL BUTTONS */}
-              <div className="mt-12 pt-8 border-t border-white/5">
+              <div className="mt-10 pt-8 border-t border-white/5">
                 <div className="flex gap-4">
                   <SocialPill icon={<Chrome size={20} />} color="#7ed957" />
                   <SocialPill icon={<Github size={20} />} color="#ffb423" />
@@ -162,8 +199,8 @@ export default function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClos
                 </div>
               </div>
 
-              <div className="mt-10 text-center">
-                <button onClick={() => setIsLogin(!isLogin)} className="text-[10px] font-mono font-black text-gray-500 hover:text-white uppercase tracking-widest cursor-pointer transition-colors">
+              <div className="mt-8 text-center">
+                <button onClick={() => { setIsLogin(!isLogin); setError(""); }} className="text-[10px] font-mono font-black text-gray-500 hover:text-white uppercase tracking-widest cursor-pointer transition-colors">
                   {isLogin ? "Generate New Signature" : "Return to Terminal"}
                 </button>
               </div>
@@ -175,12 +212,12 @@ export default function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClos
   );
 }
 
-// Sub-components as before...
 function AuthInput({ icon, placeholder, type = "text", value, onChange }: any) {
     return (
       <div className="relative group">
         <div className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-600 group-focus-within:text-[#7ed957] transition-colors">{icon}</div>
         <input 
+          required
           type={type} placeholder={placeholder} value={value} onChange={(e) => onChange(e.target.value)}
           className="w-full bg-white/[0.02] border border-white/10 px-16 py-5 rounded-2xl text-xs font-mono font-bold text-white outline-none focus:border-[#7ed957]/50 focus:bg-white/[0.05] transition-all uppercase placeholder:text-gray-700" 
         />
