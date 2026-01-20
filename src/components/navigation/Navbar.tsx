@@ -1,4 +1,6 @@
 "use client";
+// Add this line at the top
+import { supabase } from "@/lib/supabase";
 import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import Image from "next/image";
