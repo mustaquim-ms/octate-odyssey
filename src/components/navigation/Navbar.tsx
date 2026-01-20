@@ -22,13 +22,24 @@ function NavbarContent() {
   const [hoveredPath, setHoveredPath] = useState("");
   const [isAuthOpen, setIsAuthOpen] = useState(false);
 
-  useEffect(() => {
-    setMounted(true);
-    const session = localStorage.getItem("Navigator_session");
-    if (session === "active") {
-      setIsLoggedIn(true);
-    }
-  }, []);
+  // Inside NavbarContent component
+useEffect(() => {
+  setMounted(true);
+  
+  // Get active session from Supabase
+  const getSession = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    setIsLoggedIn(!!session);
+  };
+  getSession();
+
+  // Listen for login/logout changes automatically
+  const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    setIsLoggedIn(!!session);
+  });
+
+  return () => subscription.unsubscribe();
+}, []);
 
   useEffect(() => {
     const authRequest = searchParams.get("auth");
