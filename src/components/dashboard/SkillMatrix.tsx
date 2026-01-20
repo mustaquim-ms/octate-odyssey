@@ -19,7 +19,7 @@ export default function SkillMatrix() {
           <PolarGrid stroke="#ffffff10" />
           <PolarAngleAxis dataKey="subject" tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 'bold' }} />
           <Radar
-            name="Pilot"
+            name="Navigator"
             dataKey="A"
             stroke="#7ed957"
             fill="#7ed957"

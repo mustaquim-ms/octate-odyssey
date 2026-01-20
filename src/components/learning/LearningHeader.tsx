@@ -22,7 +22,7 @@ export default function LearningHeader() {
           <RadarChart cx="50%" cy="50%" outerRadius="80%" data={statsData}>
             <PolarGrid stroke="#ffffff10" />
             <PolarAngleAxis dataKey="subject" tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 'bold' }} />
-            <Radar name="Pilot" dataKey="A" stroke="#7ed957" fill="#7ed957" fillOpacity={0.3} />
+            <Radar name="Navigator" dataKey="A" stroke="#7ed957" fill="#7ed957" fillOpacity={0.3} />
           </RadarChart>
         </ResponsiveContainer>
       </div>

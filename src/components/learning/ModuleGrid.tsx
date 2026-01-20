@@ -1,11 +1,12 @@
 "use client";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { 
   Globe, Cpu, Terminal, BookOpen, Zap, Route, 
   Wifi, ShieldAlert, ChevronLeft, Play, Lock 
 } from "lucide-react";
+import { useAuthGuard } from "@/hooks/useAuthGuard";
 
 const MODULE_DATA = {
   core: [
@@ -199,52 +200,64 @@ const MODULE_DATA = {
       ]
     },
     { 
-    slug: "troubleshooting-pro",
-    title: "Hands-On Troubleshooting", 
-    desc: "Advanced forensics. Master packet captures, latency tracing, and MTU issues.", 
-    icon: <ShieldAlert size={24} />, 
-    level: "Advanced", 
-    duration: "6h", 
-    progress: 0,
-    lessons: ["Packet Capture Art", "Advanced Traceroute", "DNS Debugging", "MTU & Fragmentation", "Forensics Lab"]
-  },
-  { 
-    slug: "cloud-networking",
-    title: "Cloud Networking", 
-    desc: "Master VPCs, Security Groups, and Load Balancing in AWS, Azure, and GCP.", 
-    icon: <Globe size={24} />, 
-    level: "Intermediate", 
-    duration: "7h", 
-    progress: 0,
-    lessons: ["VPC Architecture", "Cloud Gateways", "NACLs vs SG", "Global Load Balancing", "Hybrid Cloud Links"]
-  },
-  { 
-    slug: "sdn-automation",
-    title: "SDN & Automation", 
-    desc: "The future of networking. Learn Python, Ansible, and API-driven control planes.", 
-    icon: <Cpu size={24} />, 
-    level: "Expert", 
-    duration: "10h", 
-    progress: 0,
-    lessons: ["Control vs Data Plane", "Network APIs", "Ansible for Networks", "Python Netmiko Lab", "Infrastructure as Code"]
-  },
-  { 
-    slug: "enterprise-design",
-    title: "Enterprise Design", 
-    desc: "Design resilient campus networks using Hierarchical models and Zero Trust.", 
-    icon: <Route size={24} />, 
-    level: "Expert", 
-    duration: "8h", 
-    progress: 0,
-    lessons: ["Hierarchical Models", "Redundancy (HSRP)", "Data Center Design", "SD-WAN Logic", "Zero Trust Architecture"]
-  },
-  
+      slug: "troubleshooting-pro",
+      title: "Hands-On Troubleshooting", 
+      desc: "Advanced forensics. Master packet captures, latency tracing, and MTU issues.", 
+      icon: <ShieldAlert size={24} />, 
+      level: "Advanced", 
+      duration: "6h", 
+      progress: 0,
+      lessons: ["Packet Capture Art", "Advanced Traceroute", "DNS Debugging", "MTU & Fragmentation", "Forensics Lab"]
+    },
+    { 
+      slug: "cloud-networking",
+      title: "Cloud Networking", 
+      desc: "Master VPCs, Security Groups, and Load Balancing in AWS, Azure, and GCP.", 
+      icon: <Globe size={24} />, 
+      level: "Intermediate", 
+      duration: "7h", 
+      progress: 0,
+      lessons: ["VPC Architecture", "Cloud Gateways", "NACLs vs SG", "Global Load Balancing", "Hybrid Cloud Links"]
+    },
+    { 
+      slug: "sdn-automation",
+      title: "SDN & Automation", 
+      desc: "The future of networking. Learn Python, Ansible, and API-driven control planes.", 
+      icon: <Cpu size={24} />, 
+      level: "Expert", 
+      duration: "10h", 
+      progress: 0,
+      lessons: ["Control vs Data Plane", "Network APIs", "Ansible for Networks", "Python Netmiko Lab", "Infrastructure as Code"]
+    },
+    { 
+      slug: "enterprise-design",
+      title: "Enterprise Design", 
+      desc: "Design resilient campus networks using Hierarchical models and Zero Trust.", 
+      icon: <Route size={24} />, 
+      level: "Expert", 
+      duration: "8h", 
+      progress: 0,
+      lessons: ["Hierarchical Models", "Redundancy (HSRP)", "Data Center Design", "SD-WAN Logic", "Zero Trust Architecture"]
+    },
   ]
 };
 
-export default function ModuleGrid({ category }: { category: 'core' | 'specialized' }) {
+type CategoryType = 'core' | 'specialized' | 'professional';
+
+export default function ModuleGrid({ category }: { category: CategoryType }) {
   const [selected, setSelected] = useState<any | null>(null);
+  const { checkAuth } = useAuthGuard();
+  const router = useRouter();
+  
   const data = MODULE_DATA[category];
+
+  // UPDATED: Logic to intercept lesson clicks with Auth Guard
+  const handleLessonClick = (path: string) => {
+    checkAuth(() => {
+      // This only runs if Pilot is authenticated
+      router.push(path);
+    });
+  };
 
   return (
     <>
@@ -296,7 +309,7 @@ export default function ModuleGrid({ category }: { category: 'core' | 'specializ
             <motion.div 
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               onClick={() => setSelected(null)}
-              className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100]" 
+              className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] cursor-pointer" 
             />
             <motion.div 
               initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
@@ -317,14 +330,13 @@ export default function ModuleGrid({ category }: { category: 'core' | 'specializ
                 <h4 className="text-[#ffb423] font-mono text-[10px] font-black uppercase tracking-[0.4em] mb-8">Mission Checklist</h4>
                 
                 {selected.lessons.map((lessonName: string, i: number) => {
-                  // UNLOCK LOGIC: Lesson 1 is always open. 
-                  // Subsequent lessons open as progress increases.
-                  const isUnlocked = i === 0 || (selected.progress > (i * 10));
+                  const isUnlocked = i === 0 || (selected.progress >= (i * 12));
 
                   return isUnlocked ? (
-                    <Link 
+                    // MODIFIED: Use a div with onClick instead of <Link> to enable Auth Check
+                    <div 
                       key={i} 
-                      href={`/learning/${selected.slug}/lesson-${i + 1}`}
+                      onClick={() => handleLessonClick(`/learning/${selected.slug}/lesson-${i + 1}`)}
                       className="p-6 bg-white/[0.02] border border-[#7ed957]/40 rounded-2xl flex items-center justify-between group transition-all hover:bg-[#7ed95705] cursor-pointer"
                     >
                       <div className="flex items-center gap-6 text-left">
@@ -332,7 +344,7 @@ export default function ModuleGrid({ category }: { category: 'core' | 'specializ
                         <span className="font-mono text-xs font-bold uppercase tracking-widest text-white">{lessonName}</span>
                       </div>
                       <Play size={16} className="text-[#7ed957] group-hover:scale-125 transition-transform" />
-                    </Link>
+                    </div>
                   ) : (
                     <div key={i} className="p-6 bg-white/[0.02] border border-white/5 rounded-2xl flex items-center justify-between opacity-40 cursor-not-allowed">
                       <div className="flex items-center gap-6 text-left">
@@ -345,20 +357,19 @@ export default function ModuleGrid({ category }: { category: 'core' | 'specializ
                 })}
               </div>
               
-              {/* FINAL EXAM GATING */}
+              {/* FINAL EXAM GATING - Also protected by Auth Check */}
               <div className="mt-12">
                 <h4 className="text-gray-600 font-mono text-[9px] uppercase font-black mb-4 tracking-widest text-center">Final Module Evaluation</h4>
-                <Link href={selected.progress >= 85 ? `/learning/${selected.slug}/final-exam` : "#"}>
-                    <button 
+                <button 
                     disabled={selected.progress < 85}
+                    onClick={() => handleLessonClick(`/learning/${selected.slug}/final-exam`)}
                     className={`w-full py-6 font-black font-mono text-xs uppercase tracking-[0.3em] rounded-sm transition-all shadow-lg 
                         ${selected.progress >= 85 
                         ? 'bg-[#7ed957] text-black hover:bg-[#ffb423] cursor-pointer shadow-[0_0_30px_rgba(126,217,87,0.3)]' 
                         : 'bg-white/5 text-gray-600 cursor-not-allowed border border-white/5'}`}
-                    >
+                >
                     {selected.progress >= 85 ? "Initialize Final Exam" : "Achieve 85% Sync to Unlock Exam"}
-                    </button>
-                </Link>
+                </button>
               </div>
             </motion.div>
           </>

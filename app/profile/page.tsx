@@ -17,7 +17,7 @@ export default function ProfilePage() {
 
   // Security Check: Look for active session in localStorage
   useEffect(() => {
-    const session = localStorage.getItem("pilot_session");
+    const session = localStorage.getItem("Navigator_session");
     setIsAuthorized(session === "active");
   }, []);
 
@@ -75,7 +75,7 @@ export default function ProfilePage() {
           {/* LEFT SIDEBAR: Navigation */}
           <div className="space-y-2">
             <div className="mb-10 px-4">
-                <span className="font-mono text-[#ffb423] text-[10px] font-black uppercase tracking-[0.4em]">Pilot Identity</span>
+                <span className="font-mono text-[#ffb423] text-[10px] font-black uppercase tracking-[0.4em]">Navigator Identity</span>
                 <h1 className="font-[family-name:var(--font-outfit)] text-5xl font-black uppercase tracking-tighter mt-1 leading-none">Profile</h1>
             </div>
 

@@ -50,20 +50,10 @@ const experiences = [
 // We double the array to create a seamless infinite loop
 const doubleExperiences = [...experiences, ...experiences];
 
-export default function PilotExperiences() {
+export default function NavigatorExperiences() {
   return (
     <section className="w-full mt-56 overflow-hidden py-10">
       {/* Section Header */}
-      <div className="flex flex-col items-center gap-5 mb-20 text-center px-10">
-        <div className="flex items-center gap-4">
-          <div className="h-[1px] w-12 bg-[#7ed957]/30" />
-          <span className="text-[#7ed957] font-mono text-[10px] font-bold tracking-[0.6em] uppercase opacity-70">Pilot Logs</span>
-          <div className="h-[1px] w-12 bg-[#7ed957]/30" />
-        </div>
-        <h2 className="text-5xl font-[family-name:var(--font-outfit)] font-black uppercase tracking-tighter text-white">
-          Transmission Feedback
-        </h2>
-      </div>
 
       {/* Infinite Marquee Container */}
       <div className="relative flex overflow-hidden group">

@@ -17,7 +17,7 @@ export default function InteractiveTerminal({ expectedCommand, onSuccess, succes
     e.preventDefault();
     const cmd = input.trim().toLowerCase();
     
-    const newLogs = [...logs, { type: 'cmd' as const, text: `pilot@odyssey:~$ ${input}` }];
+    const newLogs = [...logs, { type: 'cmd' as const, text: `Navigator@odyssey:~$ ${input}` }];
     
     if (cmd === expectedCommand.toLowerCase()) {
       newLogs.push({ type: 'out' as const, text: successOutput });
@@ -51,7 +51,7 @@ export default function InteractiveTerminal({ expectedCommand, onSuccess, succes
           </p>
         ))}
         <form onSubmit={handleCommand} className="flex gap-2">
-          <span className="text-[#7ed957] font-bold">pilot@odyssey:~$</span>
+          <span className="text-[#7ed957] font-bold">Navigator@odyssey:~$</span>
           <input 
             autoFocus
             className="bg-transparent outline-none border-none flex-1 text-white"

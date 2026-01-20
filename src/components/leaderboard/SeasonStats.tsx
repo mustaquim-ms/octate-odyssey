@@ -3,7 +3,7 @@ import { Activity, Globe, Zap, Target } from "lucide-react";
 import { motion } from "framer-motion";
 
 const GLOBAL_DATA = [
-  { label: "Active Pilots", val: "1,204", icon: <Globe size={14} />, color: "#7ed957" },
+  { label: "Active Navigators", val: "1,204", icon: <Globe size={14} />, color: "#7ed957" },
   { label: "Packets Routed", val: "4.2M", icon: <Zap size={14} />, color: "#ffb423" },
   { label: "Avg. Accuracy", val: "88.4%", icon: <Target size={14} />, color: "#7ed957" },
 ];

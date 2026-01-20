@@ -4,12 +4,12 @@ import { Mail, User, Globe, Pencil } from "lucide-react";
 export default function AccountSettings() {
   return (
     <div className="bg-[#0a101f] border border-white/5 p-10 rounded-[40px] h-full">
-      <h3 className="font-[family-name:var(--font-outfit)] text-2xl font-black uppercase mb-10 text-white">Pilot Information</h3>
+      <h3 className="font-[family-name:var(--font-outfit)] text-2xl font-black uppercase mb-10 text-white">Navigator Information</h3>
       
       <form className="space-y-8" onSubmit={(e) => e.preventDefault()}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <ProfileInput label="Full Name" val="Mustaquim Chowdhury" icon={<User size={18}/>} />
-            <ProfileInput label="Pilot Handle" val="pilot_mustaquim" icon={<Pencil size={18}/>} />
+            <ProfileInput label="Navigator Handle" val="Navigator_mustaquim" icon={<Pencil size={18}/>} />
             <ProfileInput label="Encryption Email" val="mustaquim@odyssey.net" icon={<Mail size={18}/>} />
             <ProfileInput label="Operational Region" val="Bangladesh [AS45829]" icon={<Globe size={18}/>} />
         </div>

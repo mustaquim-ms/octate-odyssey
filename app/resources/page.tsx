@@ -6,8 +6,11 @@ import Footer from "@/components/navigation/Footer";
 import { 
   Book, FileText, Calculator, Search, 
   ExternalLink, Download, Code, 
-  Terminal, Layers, Share2, X, Zap, Cpu
+  Terminal, Layers, Share2, X, Zap, Cpu, Lock
 } from "lucide-react";
+
+// Hooks & Utils
+import { useAuthGuard } from "@/hooks/useAuthGuard";
 
 // Sub-components
 import QuickSubnetCalc from "@/components/resources/QuickSubnetCalc";
@@ -51,12 +54,17 @@ const RESOURCE_CARDS = [
 
 export default function ResourcesPage() {
   const [activeTool, setActiveTool] = useState<string | null>(null);
+  const { checkAuth } = useAuthGuard();
 
-  const closeTool = () => setActiveTool(null);
+  const handleToolInitialize = (id: string) => {
+    // SECURITY CHECK BEFORE OPENING TOOL
+    checkAuth(() => {
+        setActiveTool(id);
+    });
+  };
 
   return (
     <main className="relative min-h-screen flex flex-col bg-[#020617] text-white selection:bg-[#7ed957] selection:text-black">
-      {/* Background Cyber-Grid */}
       <div className="fixed inset-0 bg-[linear-gradient(to_right,rgba(126,217,87,0.02)_1px,transparent_1px),linear-gradient(to_bottom,rgba(126,217,87,0.02)_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none" />
       
       <Navbar />
@@ -65,11 +73,7 @@ export default function ResourcesPage() {
         
         {/* HERO HEADER */}
         <div className="flex flex-col lg:flex-row justify-between items-start gap-12 mb-20">
-            <motion.div 
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="max-w-2xl"
-            >
+            <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="max-w-2xl">
                 <div className="flex items-center gap-3 mb-4">
                     <Book className="text-[#ffb423]" size={20} />
                     <span className="font-mono text-[10px] text-[#ffb423] font-black uppercase tracking-[0.4em]">Central Intelligence Repository</span>
@@ -82,12 +86,7 @@ export default function ResourcesPage() {
                 </p>
             </motion.div>
             
-            {/* SEARCH BAR UI */}
-            <motion.div 
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="w-full lg:w-96 relative group"
-            >
+            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="w-full lg:w-96 relative group">
                 <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-600 group-focus-within:text-[#7ed957] transition-colors" size={18} />
                 <input 
                     type="text" 
@@ -97,16 +96,12 @@ export default function ResourcesPage() {
             </motion.div>
         </div>
 
-        {/* 1. HERO TOOL: QUICK PARSER */}
-        <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-        >
+        {/* 1. HERO TOOL: QUICK PARSER (Public Preview) */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
             <QuickSubnetCalc />
         </motion.div>
 
-        {/* 2. MAIN TOOLS GRID */}
+        {/* 2. MAIN TOOLS GRID (Gated) */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8 mt-24">
             {RESOURCE_CARDS.map((card, i) => (
                 <motion.div 
@@ -115,7 +110,7 @@ export default function ResourcesPage() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 * i }}
                     whileHover={{ y: -10 }}
-                    onClick={() => setActiveTool(card.id)}
+                    onClick={() => handleToolInitialize(card.id)}
                     className="bg-[#0a101f]/60 border border-white/5 p-10 rounded-[40px] group cursor-pointer hover:border-[#7ed95733] transition-all backdrop-blur-sm relative overflow-hidden"
                 >
                     <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
@@ -138,18 +133,18 @@ export default function ResourcesPage() {
                     
                     <div className="pt-6 border-t border-white/5 flex justify-between items-center text-[#7ed957] group-hover:text-[#ffb423] transition-colors">
                         <span className="text-[10px] font-black uppercase tracking-[0.2em]">Initialize Tool</span>
-                        <Zap size={14} className="animate-pulse" />
+                        <Lock size={14} className="opacity-40 group-hover:opacity-100 transition-opacity" />
                     </div>
                 </motion.div>
             ))}
         </div>
 
-        {/* 3. CHEAT SHEET & CONTRIBUTION SECTION */}
+        {/* 3. CHEAT SHEET SECTION (Gated) */}
         <div className="mt-32 grid grid-cols-1 lg:grid-cols-3 gap-12">
             <div className="lg:col-span-2">
                 <div className="flex items-center gap-4 mb-10">
                     <div className="w-1.5 h-8 bg-[#7ed957] rounded-full" />
-                    <h2 className="font-[family-name:var(--font-outfit)] text-4xl font-black uppercase tracking-tighter">Tactical Cheat Sheets</h2>
+                    <h2 className="font-[family-name:var(--font-outfit)] text-4xl font-black uppercase tracking-tighter text-white">Tactical Cheat Sheets</h2>
                 </div>
                 <div className="space-y-4">
                     <DownloadRow title="Subnetting Mastery PDF" size="2.4 MB" date="2025.12.01" />
@@ -161,16 +156,17 @@ export default function ResourcesPage() {
 
             <motion.div 
                 whileHover={{ scale: 1.02 }}
-                className="bg-gradient-to-br from-[#ffb42311] to-transparent border border-[#ffb42333] p-12 rounded-[40px] flex flex-col justify-center text-center relative overflow-hidden group shadow-2xl"
+                onClick={() => handleToolInitialize('api')}
+                className="bg-gradient-to-br from-[#ffb42311] to-transparent border border-[#ffb42333] p-12 rounded-[40px] flex flex-col justify-center text-center relative overflow-hidden group shadow-2xl cursor-pointer"
             >
                 <div className="absolute -top-10 -right-10 opacity-5 group-hover:rotate-12 transition-transform duration-700">
                     <Share2 size={250} />
                 </div>
-                <h3 className="text-[#ffb423] font-[family-name:var(--font-outfit)] text-3xl font-black uppercase mb-4 tracking-tighter">Pilot Uplink</h3>
+                <h3 className="text-[#ffb423] font-[family-name:var(--font-outfit)] text-3xl font-black uppercase mb-4 tracking-tighter">Navigator Uplink</h3>
                 <p className="text-gray-400 font-mono text-xs leading-relaxed uppercase font-bold mb-10">
                     Contribute your technical logs or custom cheat sheets to the Odyssey fleet. Earn 500 XP per approved file.
                 </p>
-                <button className="bg-[#ffb423] text-black font-black font-mono text-xs py-5 rounded-xl uppercase tracking-[0.3em] hover:bg-white transition-all shadow-lg cursor-pointer">
+                <button className="bg-[#ffb423] text-black font-black font-mono text-xs py-5 rounded-xl uppercase tracking-[0.3em] hover:bg-white transition-all shadow-lg">
                     Upload Protocol
                 </button>
             </motion.div>
@@ -180,54 +176,24 @@ export default function ResourcesPage() {
       {/* 4. HOLOGRAPHIC TOOL MODAL SYSTEM */}
       <AnimatePresence>
         {activeTool && (
-            <motion.div 
-                initial={{ opacity: 0 }} 
-                animate={{ opacity: 1 }} 
-                exit={{ opacity: 0 }}
-                className="fixed inset-0 z-[100] bg-[#020617]/90 backdrop-blur-2xl flex items-center justify-center p-6 md:p-12"
-            >
-                {/* Modal Container */}
-                <motion.div 
-                    initial={{ scale: 0.9, y: 20 }}
-                    animate={{ scale: 1, y: 0 }}
-                    exit={{ scale: 0.9, y: 20 }}
-                    className="w-full max-w-7xl h-[85vh] bg-[#0a101f] border border-white/10 rounded-[50px] relative flex flex-col overflow-hidden shadow-[0_0_100px_rgba(0,0,0,0.8)]"
-                >
-                    {/* Header Bar */}
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[200] bg-[#020617]/90 backdrop-blur-2xl flex items-center justify-center p-6 md:p-12">
+                <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }} className="w-full max-w-7xl h-[85vh] bg-[#0a101f] border border-white/10 rounded-[50px] relative flex flex-col overflow-hidden shadow-[0_0_100px_rgba(0,0,0,0.8)]">
                     <div className="p-8 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
                         <div className="flex items-center gap-4">
                             <div className="w-2 h-2 rounded-full bg-[#7ed957] animate-ping" />
-                            <h2 className="font-[family-name:var(--font-outfit)] text-3xl font-black uppercase tracking-tighter">
+                            <h2 className="font-[family-name:var(--font-outfit)] text-3xl font-black uppercase tracking-tighter text-white">
                                 {RESOURCE_CARDS.find(t => t.id === activeTool)?.title}
                             </h2>
                         </div>
-                        <button 
-                            onClick={closeTool}
-                            className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center text-gray-500 hover:bg-red-500 hover:text-white transition-all cursor-pointer"
-                        >
-                            <X size={24} />
-                        </button>
+                        <button onClick={closeTool} className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center text-gray-500 hover:bg-red-500 hover:text-white transition-all cursor-pointer"><X size={24} /></button>
                     </div>
-
-                    {/* Tool Workspace Area */}
                     <div className="flex-1 overflow-y-auto p-8 md:p-16 custom-scrollbar">
-                        {activeTool === 'calc' && <IPAnalyzer />}
-                        {activeTool === 'visual' && <IPAnalyzer />}
+                        {(activeTool === 'calc' || activeTool === 'visual') && <IPAnalyzer />}
                         {activeTool === 'sim' && <NetSim />}
-                        {activeTool === 'api' && (
-                            <div className="flex flex-col items-center justify-center h-full text-center space-y-6">
-                                <Code size={64} className="text-[#ffb423] opacity-20" />
-                                <h3 className="text-2xl font-bold uppercase font-[family-name:var(--font-outfit)]">System Documentation</h3>
-                                <p className="text-gray-500 font-mono text-sm max-w-lg uppercase">
-                                    The Octate Odyssey API is currently in read-only mode for verified Network Architects. Full documentation endpoint synchronization scheduled for Phase 03.
-                                </p>
-                            </div>
-                        )}
+                        {activeTool === 'api' && <div className="text-center p-20 font-mono text-gray-500">API Documentation Module is in Standby Mode.</div>}
                     </div>
-
-                    {/* Footer Status */}
                     <div className="p-6 border-t border-white/5 bg-black/40 flex justify-between items-center font-mono text-[9px] text-gray-600 font-black uppercase tracking-[0.4em]">
-                        <span>Session: Active</span>
+                        <span>Session: {localStorage.getItem("pilot_name") || "Active"}</span>
                         <span>Encrypted Environment v2.0</span>
                     </div>
                 </motion.div>
@@ -240,11 +206,13 @@ export default function ResourcesPage() {
   );
 }
 
-// Sub-component for Download Rows
 function DownloadRow({ title, size, date }: any) {
+    const { checkAuth } = useAuthGuard();
+    
     return (
         <motion.div 
             whileHover={{ x: 10 }}
+            onClick={() => checkAuth(() => alert(`Authorized: Starting download of ${title}`))}
             className="bg-[#0a101f]/40 border border-white/5 p-6 rounded-3xl flex items-center justify-between group hover:bg-white/[0.03] transition-all cursor-pointer"
         >
             <div className="flex items-center gap-6 text-left">
@@ -258,7 +226,7 @@ function DownloadRow({ title, size, date }: any) {
                     </p>
                 </div>
             </div>
-            <div className="w-12 h-12 rounded-full border border-white/5 flex items-center justify-center text-gray-600 group-hover:text-white group-hover:border-[#7ed957] transition-all">
+            <div className="w-12 h-12 rounded-full border border-white/5 flex items-center justify-center text-gray-500 group-hover:text-white group-hover:border-[#7ed957] transition-all">
                 <Download size={20} />
             </div>
         </motion.div>

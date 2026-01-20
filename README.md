@@ -35,7 +35,7 @@ A vertical, interactive visualization of the 7-layer OSI Model. Click through la
 
 Calculate Network IDs, Broadcast Addresses, and CIDR masks against a ticking clock in our high-pressure simulation mode.
 
-### 📊 Live Pilot Leaderboards
+### 📊 Live Navigator Leaderboards
 
 Track your progress and compete with network engineers worldwide. Earn XP and climb from **Novice** to **Network Architect**.
 

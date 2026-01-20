@@ -40,7 +40,7 @@ export default function SecurityPortal() {
       <div className="bg-red-500/5 border border-red-500/20 p-10 rounded-[40px] flex flex-col md:flex-row justify-between items-center gap-6">
          <div className="text-center md:text-left">
             <h4 className="text-red-500 font-black uppercase tracking-tighter text-lg font-[family-name:var(--font-outfit)]">Self-Destruct Sequence</h4>
-            <p className="text-gray-600 font-mono text-[9px] uppercase font-bold mt-1 tracking-widest">Permanently remove your pilot profile from the matrix</p>
+            <p className="text-gray-600 font-mono text-[9px] uppercase font-bold mt-1 tracking-widest">Permanently remove your Navigator profile from the matrix</p>
          </div>
          <button className="px-10 py-4 border border-red-500/30 text-red-500 text-[10px] font-black uppercase tracking-[0.3em] hover:bg-red-500 hover:text-white transition-all cursor-pointer rounded-xl font-mono">
             Terminate Profile

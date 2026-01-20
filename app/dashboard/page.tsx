@@ -51,7 +51,7 @@ export default function DashboardPage() {
               <span className="font-mono text-[#ffb423] text-[10px] font-black uppercase tracking-[0.6em]">Telemetry Terminal active</span>
             </div>
             <h1 className="font-[family-name:var(--font-outfit)] text-6xl font-black uppercase tracking-tighter leading-none">
-              Welcome back, <span className="text-[#7ed957]">Pilot</span>
+              Welcome back, <span className="text-[#7ed957]">Navigator</span>
             </h1>
           </motion.div>
 

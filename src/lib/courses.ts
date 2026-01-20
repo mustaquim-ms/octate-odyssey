@@ -858,7 +858,7 @@ Real engineering is 50% technology and 50% **Process**.
         practical: {
           goal: "Commit a change with a safety timer. Type: 'commit --check --timer 10m'",
           expected: "commit --check --timer 10m",
-          output: "Configuration applied.\n[SAFETY] If not confirmed in 10m, system will auto-rollback.\nStatus: Awaiting Pilot confirmation."
+          output: "Configuration applied.\n[SAFETY] If not confirmed in 10m, system will auto-rollback.\nStatus: Awaiting Navigator confirmation."
         },
         quiz: [
           { id: 1, q: "What is the most important part of any network change?", options: ["Speed", "Having a rollback plan", "Doing it alone"], correct: 1 }
@@ -889,7 +889,7 @@ Real engineering is 50% technology and 50% **Process**.
    "osi-model": {
     title: "Mastering TCP/IP and the OSI Model",
     threshold: 85,
-    rankAward: "Protocol Pilot",
+    rankAward: "Protocol Navigator",
     "lesson-1": {
       title: "Why Networking Needs Layers",
       duration: "45 mins",

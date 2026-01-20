@@ -16,7 +16,7 @@ export default function LeaderboardTable() {
         <thead>
           <tr className="border-b border-white/5 bg-white/[0.02]">
             <th className="p-8 font-mono text-[10px] uppercase font-black text-gray-500 tracking-[0.4em]">Rank</th>
-            <th className="p-8 font-mono text-[10px] uppercase font-black text-gray-500 tracking-[0.4em]">Pilot</th>
+            <th className="p-8 font-mono text-[10px] uppercase font-black text-gray-500 tracking-[0.4em]">Navigator</th>
             <th className="p-8 font-mono text-[10px] uppercase font-black text-gray-500 tracking-[0.4em]">Tier</th>
             <th className="p-8 font-mono text-[10px] uppercase font-black text-gray-500 tracking-[0.4em]">Region</th>
             <th className="p-8 font-mono text-[10px] uppercase font-black text-gray-500 tracking-[0.4em] text-right">XP Sync</th>

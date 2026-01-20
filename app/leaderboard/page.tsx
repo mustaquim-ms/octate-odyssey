@@ -23,7 +23,7 @@ export default function LeaderboardPage() {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            <span className="font-mono text-[#7ed957] text-xs font-black uppercase tracking-[0.6em]">Global Pilot Registry</span>
+            <span className="font-mono text-[#7ed957] text-xs font-black uppercase tracking-[0.6em]">Global Navigator Registry</span>
             <h1 className="font-[family-name:var(--font-outfit)] text-7xl font-black uppercase tracking-tighter mt-4">
               HALL OF <span className="text-[#ffb423]">TITANS</span>
             </h1>

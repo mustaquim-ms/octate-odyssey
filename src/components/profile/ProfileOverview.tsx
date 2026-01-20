@@ -3,15 +3,15 @@ import { useEffect, useState } from "react";
 import { Trophy, Star, Target, Activity, Award } from "lucide-react";
 
 export default function ProfileOverview() {
-  const [pilotName, setPilotName] = useState("Pilot");
-  const [pilotHandle, setPilotHandle] = useState("unknown_entity");
+  const [NavigatorName, setNavigatorName] = useState("Navigator");
+  const [NavigatorHandle, setNavigatorHandle] = useState("unknown_entity");
 
   // Load user data from localStorage on mount
   useEffect(() => {
-    const savedName = localStorage.getItem("pilot_name");
-    const savedHandle = localStorage.getItem("pilot_handle");
-    if (savedName) setPilotName(savedName);
-    if (savedHandle) setPilotHandle(savedHandle);
+    const savedName = localStorage.getItem("Navigator_name");
+    const savedHandle = localStorage.getItem("Navigator_handle");
+    if (savedName) setNavigatorName(savedName);
+    if (savedHandle) setNavigatorHandle(savedHandle);
   }, []);
 
   return (
@@ -24,15 +24,15 @@ export default function ProfileOverview() {
         <div className="flex flex-col md:flex-row items-center gap-10 relative z-10">
             <div className="w-32 h-32 rounded-full border-4 border-[#7ed957] p-1 shadow-[0_0_30px_rgba(126,217,87,0.2)]">
                 <div className="w-full h-full rounded-full bg-gradient-to-br from-[#ffb423] to-[#7ed957] flex items-center justify-center text-black text-4xl font-black uppercase">
-                    {pilotName[0]}
+                    {NavigatorName[0]}
                 </div>
             </div>
             <div className="text-center md:text-left">
                 <h2 className="font-[family-name:var(--font-outfit)] text-5xl font-black uppercase tracking-tighter text-white">
-                  Pilot_{pilotName}
+                  Navigator_{NavigatorName}
                 </h2>
                 <p className="font-mono text-[#7ed957] font-bold uppercase tracking-widest mt-1">
-                  Status: Active Registry — @{pilotHandle}
+                  Status: Active Registry — @{NavigatorHandle}
                 </p>
                 <p className="text-gray-500 text-sm mt-4 max-w-lg leading-relaxed font-mono uppercase">
                   Authenticated user profile for the Octate Odyssey Matrix. Currently specializing in high-speed packet processing and secure network architectures.
@@ -43,7 +43,7 @@ export default function ProfileOverview() {
 
       {/* 2. Rank Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <MetricBox label="Global Ranking" val="#412" sub="Top 5% of Pilots" color="#ffb423" />
+        <MetricBox label="Global Ranking" val="#412" sub="Top 5% of Navigators" color="#ffb423" />
         <MetricBox label="Mission Success" val="94.2%" sub="High Accuracy" color="#7ed957" />
         <MetricBox label="Certificates" val="08" sub="Verified Awards" color="#ffb423" />
       </div>
