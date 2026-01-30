@@ -1,46 +1,52 @@
 "use client";
-import { Mail, User, Globe, Pencil } from "lucide-react";
+import { useState } from "react";
+import { supabase } from "@/lib/supabase";
+import { User, Pencil, Save } from "lucide-react";
 
 export default function AccountSettings() {
+  const [newUsername, setNewUsername] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  const updateProfile = async () => {
+    setSaving(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      await supabase
+        .from('profiles')
+        .update({ username: newUsername })
+        .eq('id', user.id);
+      alert("System Updated: New Pilot Signature established.");
+      window.location.reload();
+    }
+    setSaving(false);
+  };
+
   return (
-    <div className="bg-[#0a101f] border border-white/5 p-10 rounded-[40px] h-full">
-      <h3 className="font-[family-name:var(--font-outfit)] text-2xl font-black uppercase mb-10 text-white">Navigator Information</h3>
+    <div className="bg-[#0a101f] border border-white/5 p-10 rounded-[40px]">
+      <h3 className="font-[family-name:var(--font-outfit)] text-2xl font-black uppercase mb-10 text-white">Modify Credentials</h3>
       
-      <form className="space-y-8" onSubmit={(e) => e.preventDefault()}>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <ProfileInput label="Full Name" val="Mustaquim Chowdhury" icon={<User size={18}/>} />
-            <ProfileInput label="Navigator Handle" val="Navigator_mustaquim" icon={<Pencil size={18}/>} />
-            <ProfileInput label="Encryption Email" val="mustaquim@odyssey.net" icon={<Mail size={18}/>} />
-            <ProfileInput label="Operational Region" val="Bangladesh [AS45829]" icon={<Globe size={18}/>} />
-        </div>
-
-        <div className="space-y-4">
-            <label className="font-mono text-[10px] text-gray-500 uppercase font-black tracking-widest ml-1">Mission Log / Bio</label>
-            <textarea 
-                className="w-full bg-white/5 border border-white/10 rounded-2xl p-6 font-mono text-sm focus:outline-none focus:border-[#7ed95733] transition-all h-32"
-                placeholder="Brief summary of your technical objectives..."
-            />
-        </div>
-
-        <button className="bg-[#7ed957] text-black font-black font-mono text-xs px-12 py-5 rounded-xl uppercase tracking-widest hover:bg-[#ffb423] transition-all shadow-lg cursor-pointer">
-            Save Modifications
-        </button>
-      </form>
-    </div>
-  );
-}
-
-function ProfileInput({ label, val, icon }: any) {
-    return (
+      <div className="space-y-8 max-w-md">
         <div className="space-y-3">
-            <label className="font-mono text-[10px] text-gray-500 uppercase font-black tracking-widest ml-1">{label}</label>
+            <label className="font-mono text-[10px] text-gray-500 uppercase font-black tracking-widest ml-1">Update Navigator Handle</label>
             <div className="relative group">
-                <div className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-600 group-focus-within:text-[#7ed957] transition-colors">{icon}</div>
+                <div className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-600 group-focus-within:text-[#7ed957] transition-colors"><Pencil size={18}/></div>
                 <input 
-                    defaultValue={val}
+                    placeholder="ENTER NEW USERNAME"
+                    value={newUsername}
+                    onChange={(e) => setNewUsername(e.target.value)}
                     className="w-full bg-white/5 border border-white/10 px-14 py-5 rounded-2xl font-mono text-xs focus:outline-none focus:border-[#7ed95733] transition-all text-white font-bold" 
                 />
             </div>
         </div>
-    )
+
+        <button 
+          onClick={updateProfile}
+          disabled={saving}
+          className="bg-[#7ed957] text-black font-black font-mono text-xs px-12 py-5 rounded-xl uppercase tracking-widest hover:bg-[#ffb423] transition-all shadow-lg flex items-center gap-3 disabled:opacity-50 cursor-pointer"
+        >
+          {saving ? "Processing..." : <><Save size={16} /> Update Signature</>}
+        </button>
+      </div>
+    </div>
+  );
 }
